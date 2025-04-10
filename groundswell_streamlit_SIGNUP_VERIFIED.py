@@ -44,10 +44,10 @@ if not st.session_state.logged_in and st.session_state.mode == "reset":
     new_password = st.text_input("Enter a new password", type="password")
 
     if st.button("Reset Password"):
-        if username in st.session_state.USER_DB:
-            if username.lower() == "teacher":
+    if username in st.session_state.USER_DB:
+    if username.lower() == "teacher":
                 st.error("Teacher password can only be reset by admin.")
-            else:
+    else:
                 st.session_state.USER_DB[username]["password"] = new_password
                 st.success("Password updated! You can now log in.")
                 st.session_state.mode = "login"
@@ -62,10 +62,10 @@ if not st.session_state.logged_in and st.session_state.mode == "reset":
 
 # --- Sign Up Page ---
 if not st.session_state.logged_in and st.session_state.mode == "signup":
-    st.title("Create Student Account")
-    new_user = st.text_input("Choose a username")
-    new_pass = st.text_input("Choose a password", type="password")
-    groups = st.multiselect("Select your class/groups", CLASS_GROUPS)
+   st.title("Create Student Account")
+   new_user = st.text_input("Choose a username")
+   new_pass = st.text_input("Choose a password", type="password")
+   groups = st.multiselect("Select your class/groups", CLASS_GROUPS)
 
     if st.button("Create Account"):
         if not new_user or not new_pass or not groups:
