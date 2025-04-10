@@ -43,17 +43,17 @@ if not st.session_state.logged_in and st.session_state.mode == "reset":
     username = st.text_input("Enter your username")
     new_password = st.text_input("Enter a new password", type="password")
 
-    if st.button("Reset Password"):
-    if username in st.session_state.USER_DB:
-    if username.lower() == "teacher":
-                st.error("Teacher password can only be reset by admin.")
-    else:
-                st.session_state.USER_DB[username]["password"] = new_password
-                st.success("Password updated! You can now log in.")
-                st.session_state.mode = "login"
-                st.rerun()
-        else:
-            st.error("Username not found.")
+if st.button("Reset Password"):
+if username in st.session_state.USER_DB:
+if username.lower() == "teacher":
+   st.error("Teacher password can only be reset by admin.")
+else:
+     st.session_state.USER_DB[username]["password"] = new_password
+     st.success("Password updated! You can now log in.")
+     st.session_state.mode = "login"
+     st.rerun()
+else:
+     st.error("Username not found.")
 
     if st.button("Back to Login"):
         st.session_state.mode = "login"
