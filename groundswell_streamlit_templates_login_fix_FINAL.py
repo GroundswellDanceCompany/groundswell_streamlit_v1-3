@@ -70,15 +70,15 @@ if not st.session_state.logged_in and st.session_state.mode == "signup":
     new_pass = st.text_input("Choose a password", type="password")
     groups = st.multiselect("Select your class/groups", CLASS_GROUPS)
 
-    if st.button("Create Account"):
-        if not new_user or not new_pass or not groups:
-            st.warning("Please fill in all fields.")
-        elif new_user in st.session_state.USER_DB:
-            st.error("Username already exists.")
-        elif new_user.lower() == "teacher":
-            st.error("This username is reserved.")
-        else:
-            st.session_state.USER_DB[new_user] = {
+if st.button("Create Account"):
+    if not new_user or not new_pass or not groups:
+        st.warning("Please fill in all fields.")
+    elif new_user in st.session_state.USER_DB:
+        st.error("Username already exists.")
+    elif new_user.lower() == "teacher":
+        st.error("This username is reserved.")
+    else:
+         st.session_state.USER_DB[new_user] = {
                 "password": new_pass,
                 "role": "student",
                 "groups": groups
