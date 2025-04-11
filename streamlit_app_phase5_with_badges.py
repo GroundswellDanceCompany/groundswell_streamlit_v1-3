@@ -34,8 +34,7 @@ if "register" not in st.session_state:
     st.session_state.register = False
 
 CLASS_GROUPS = [
-    "Junior Jazz", "Junior Ballet", "Contemporary", "Hip Hop", "Tap", "Advanced Jazz"
-]
+    "Junior Jazz", "Junior Ballet", "Contemporary", "Hip Hop", "Tap", "Advanced Jazz"]
 
 # ---------- Registration ----------
 st.sidebar.title("Welcome to Groundswell App")
