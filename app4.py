@@ -202,89 +202,89 @@ elif st.session_state.logged_in:
                  for b in badges:
                      st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
 
-        with st.form("add_goal"):
-            g_text = st.text_input("New Goal")
-            g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
-            g_date = st.date_input("Target Date", datetime.date.today())
-            if st.form_submit_button("Add") and g_text:
-                goals.append({
-                    "id": str(uuid.uuid4()), "text": g_text, "category": g_cat,
-                    "target_date": str(g_date), "done": False, "videos": []
-                })
-                user_goals[user] = goals
-                save_json(GOALS_FILE, user_goals)
+         with st.form("add_goal"):
+             g_text = st.text_input("New Goal")
+             g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
+             g_date = st.date_input("Target Date", datetime.date.today())
+             if st.form_submit_button("Add") and g_text:
+                 goals.append({
+                     "id": str(uuid.uuid4()), "text": g_text, "category": g_cat,
+                     "target_date": str(g_date), "done": False, "videos": []
+                 })
+                 user_goals[user] = goals
+                 save_json(GOALS_FILE, user_goals)
 
-        st.subheader("Templates for You")
-        my_groups = user_info.get("groups", [])
-        my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
-        for t in my_templates:
-            with st.expander(f"{t['text']} ({t['category']})"):
-                goal_date = st.date_input(f"Date for: {t['text']}", datetime.date.today(), key=t["id"])
-                if st.button(f"Add to My Goals", key=f"add_{t['id']}"):
-                    goals.append({
-                        "id": str(uuid.uuid4()), "text": t['text'], "category": t['category'],
-                        "target_date": str(goal_date), "done": False, "videos": []
-                    })
-                    user_goals[user] = goals
-                    save_json(GOALS_FILE, user_goals)
+         st.subheader("Templates for You")
+         my_groups = user_info.get("groups", [])
+         my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
+         for t in my_templates:
+             with st.expander(f"{t['text']} ({t['category']})"):
+                 goal_date = st.date_input(f"Date for: {t['text']}", datetime.date.today(), key=t["id"])
+                 if st.button(f"Add to My Goals", key=f"add_{t['id']}"):
+                     goals.append({
+                         "id": str(uuid.uuid4()), "text": t['text'], "category": t['category'],
+                         "target_date": str(goal_date), "done": False, "videos": []
+                     })
+                     user_goals[user] = goals
+                     save_json(GOALS_FILE, user_goals)
 
-        st.subheader("My Active Goals")
-        for g in goals:
-            col1, col2 = st.columns([0.8, 0.2])
-            with col1:
-                st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
-                if "comment" in g:
-                    st.markdown(f"_Teacher Comment:_ {g['comment']}")
-            with col2:
-                if st.checkbox("Done", value=g["done"], key=g["id"]):
-                    today = datetime.date.today().isoformat()
-                    if not g["done"]:
-                        g["done"] = True
-                        g["completed_on"] = today
-                        last = streak.get("last_completion_date")
-                        if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
-                            streak["streak"] += 1
-                        elif last != today:
-                            streak["streak"] = 1
-                        streak["last_completion_date"] = today
-                        user_streaks[user] = streak
-                        save_json(GOALS_FILE, user_goals)
-                        save_json(STREAKS_FILE, user_streaks)
-                        check_and_award_badges(user, goals, streak)
+         st.subheader("My Active Goals")
+         for g in goals:
+             col1, col2 = st.columns([0.8, 0.2])
+             with col1:
+                 st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
+                 if "comment" in g:
+                     st.markdown(f"_Teacher Comment:_ {g['comment']}")
+             with col2:
+                 if st.checkbox("Done", value=g["done"], key=g["id"]):
+                     today = datetime.date.today().isoformat()
+                     if not g["done"]:
+                         g["done"] = True
+                         g["completed_on"] = today
+                         last = streak.get("last_completion_date")
+                         if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
+                             streak["streak"] += 1
+                         elif last != today:
+                             streak["streak"] = 1
+                         streak["last_completion_date"] = today
+                         user_streaks[user] = streak
+                         save_json(GOALS_FILE, user_goals)
+                         save_json(STREAKS_FILE, user_streaks)
+                         check_and_award_badges(user, goals, streak)
 
-            st.markdown("#### Upload a New Video")
-            video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
-            uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
-            if uploaded and video_label:
-                if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
-                    vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
-                    video_path = os.path.join(VIDEO_DIR, vid_filename)
-                    with open(video_path, "wb") as f:
-                        f.write(uploaded.getbuffer())
-                    g.setdefault("videos", []).append({
-                        "filename": video_path,
-                        "label": video_label,
-                        "uploaded": str(datetime.datetime.now())
-                    })
-                    st.success(f"Video '{video_label}' uploaded.")
-                    save_json(GOALS_FILE, user_goals)
+             st.markdown("#### Upload a New Video")
+             video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
+             uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
+             if uploaded and video_label:
+                 if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
+                     vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
+                     video_path = os.path.join(VIDEO_DIR, vid_filename)
+                     with open(video_path, "wb") as f:
+                         f.write(uploaded.getbuffer())
+                     g.setdefault("videos", []).append({
+                         "filename": video_path,
+                         "label": video_label,
+                         "uploaded": str(datetime.datetime.now())
+                     })
+                     st.success(f"Video '{video_label}' uploaded.")
+                     save_json(GOALS_FILE, user_goals)
 
-            if g.get("videos"):
-                st.markdown("### Uploaded Videos")
-                for i, v in enumerate(g["videos"]):
-                    video_file = v["filename"]
-                    label = v.get("label", f"Video {i+1}")
-                    if os.path.exists(video_file):
-                        st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
-                        st.video(video_file)
-                        if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
-                            try:
-                                os.remove(video_file)
-                            except:
-                                pass
-                            del g["videos"][i]
-                            save_json(GOALS_FILE, user_goals)
-                            st.success(f"Deleted {label}")
-                            break
-                    else:
-                        st.warning(f"Missing file: {video_file}")
+             if g.get("videos"):
+                 st.markdown("### Uploaded Videos")
+                 for i, v in enumerate(g["videos"]):
+                     video_file = v["filename"]
+                     label = v.get("label", f"Video {i+1}")
+                     if os.path.exists(video_file):
+                         st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
+                         st.video(video_file)
+                         if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
+                             try:
+                                 os.remove(video_file)
+                             except:
+                                 pass
+                             del g["videos"][i]
+                             save_json(GOALS_FILE, user_goals)
+                             st.success(f"Deleted {label}")
+                             break
+                     else:
+                         st.warning(f"Missing file: {video_file}")
