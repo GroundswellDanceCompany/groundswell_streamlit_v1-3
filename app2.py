@@ -105,7 +105,7 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
         if username in db and db[username]["password"] == password:
             st.session_state.logged_in = True
             st.session_state.username = username
-            st.rerun()
+            # No st.rerun() needed
         else:
             st.error("Invalid login.")
     if st.button("Sign Up"): st.session_state.mode = "signup"; st.rerun()
