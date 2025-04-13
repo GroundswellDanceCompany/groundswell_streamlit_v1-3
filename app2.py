@@ -139,7 +139,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
             save_json(USER_DB_FILE, db)
             st.success("Password reset.")
             st.session_state.mode = "login"
-            st.rerun()
+            # No st.rerun () needed
         else:
             st.error("User not found.")
     if st.button("Back"): st.session_state.mode = "login"; st.rerun()
