@@ -175,7 +175,7 @@ elif st.session_state.logged_in:
                     del templates[i]
                     save_json(TEMPLATES_FILE, templates)
                     st.success("Template deleted.")
-                    st.experimental_rerun()
+                    st.session_state.deleted_template = True  # trigger rerender through state
 
         with tabs[2]:
             st.subheader("Student Goals + Comments")
