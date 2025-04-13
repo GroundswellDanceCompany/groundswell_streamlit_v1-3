@@ -125,7 +125,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
             save_json(USER_DB_FILE, db)
             st.success("Account created!")
             st.session_state.mode = "login"
-            st.rerun()
+            # No st.rerun() needed
     if st.button("Back"): st.session_state.mode = "login"; st.rerun()
     
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
