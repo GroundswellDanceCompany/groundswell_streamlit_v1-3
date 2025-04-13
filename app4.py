@@ -161,9 +161,9 @@ elif st.session_state.logged_in:
             if st.form_submit_button("Add") and text:
                 templates.append({
                     "id": str(uuid.uuid4()), "text": text, "category": cat, "groups": assign
-               })
-               save_json(TEMPLATES_FILE, templates)
-               st.success("Template added.")
+                })
+                save_json(TEMPLATES_FILE, templates)
+                st.success("Template added.")
 
        st.subheader("Templates")
        for t in templates:
