@@ -151,8 +151,6 @@ elif st.session_state.logged_in:
     if is_teacher:
         st.title("Teacher Dashboard")
         
-
-    if is_teacher:
         st.subheader("Create Goal Template")
         with st.form("template_form"):
             text = st.text_input("Goal Text")
