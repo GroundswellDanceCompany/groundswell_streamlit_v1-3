@@ -152,33 +152,33 @@ elif st.session_state.logged_in:
         st.title("Teacher Dashboard")
         
 
-if is_teacher:
-    st.subheader("Create Goal Template")
-    with st.form("template_form"):
-        text = st.text_input("Goal Text")
-        cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
-        assign = st.multiselect("Assign to Groups", CLASS_GROUPS)
-        if st.form_submit_button("Add") and text:
-            templates.append({
-                "id": str(uuid.uuid4()), "text": text, "category": cat, "groups": assign
-            })
-            save_json(TEMPLATES_FILE, templates)
-            st.success("Template added.")
+    if is_teacher:
+        st.subheader("Create Goal Template")
+        with st.form("template_form"):
+            text = st.text_input("Goal Text")
+            cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
+            assign = st.multiselect("Assign to Groups", CLASS_GROUPS)
+            if st.form_submit_button("Add") and text:
+                templates.append({
+                    "id": str(uuid.uuid4()), "text": text, "category": cat, "groups": assign
+               })
+               save_json(TEMPLATES_FILE, templates)
+               st.success("Template added.")
 
-    st.subheader("Templates")
-    for t in templates:
-        st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(t['groups'])}")
+       st.subheader("Templates")
+       for t in templates:
+           st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(t['groups'])}")
 
-    st.subheader("Student Goals + Comments")
-    for student, goals in user_goals.items():
-        st.markdown(f"### {student}")
-        for g in goals:
-            st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
-            comment_key = f"comment_{student}_{g['id']}"
-            new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
-            if new_comment != g.get("comment", ""):
-                g["comment"] = new_comment
-                save_json(GOALS_FILE, user_goals)
+       st.subheader("Student Goals + Comments")
+       for student, goals in user_goals.items():
+           st.markdown(f"### {student}")
+           for g in goals:
+               st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
+               comment_key = f"comment_{student}_{g['id']}"
+               new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
+               if new_comment != g.get("comment", ""):
+                   g["comment"] = new_comment
+                   save_json(GOALS_FILE, user_goals)
 
 else:
     st.title("My Goals")
