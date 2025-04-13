@@ -180,11 +180,11 @@ if is_teacher:
                     g["comment"] = new_comment
                     save_json(GOALS_FILE, user_goals)
 
-    else:
-        st.title("My Goals")
-        goals = user_goals.get(user, [])
-        streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
-        badges = user_badges.get(user, [])
+                else:
+                    st.title("My Goals")
+                    goals = user_goals.get(user, [])
+                    streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
+                    badges = user_badges.get(user, [])
 
         st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
         if badges:
