@@ -180,27 +180,27 @@ elif st.session_state.logged_in:
                     g["comment"] = new_comment
                     save_json(GOALS_FILE, user_goals)
 
-else:
-    st.title("My Goals")
-    goals = user_goals.get(user, [])
-    streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
-    badges = user_badges.get(user, [])
+     else:
+         st.title("My Goals")
+         goals = user_goals.get(user, [])
+         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
+         badges = user_badges.get(user, [])
 
-    st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
-    if badges:
-        st.markdown("### Badges:")
-        for b in badges:
-            st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
+         st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
+         if badges:
+             st.markdown("### Badges:")
+             for b in badges:
+                 st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
 
-        goals = user_goals.get(user, [])
-        streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
-        badges = user_badges.get(user, [])
+             goals = user_goals.get(user, [])
+             streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
+             badges = user_badges.get(user, [])
 
-        st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
-        if badges:
-            st.markdown("### Badges:")
-            for b in badges:
-                st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
+             st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
+             if badges:
+                 st.markdown("### Badges:")
+                 for b in badges:
+                     st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
 
         with st.form("add_goal"):
             g_text = st.text_input("New Goal")
