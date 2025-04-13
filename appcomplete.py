@@ -64,7 +64,7 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.username = ""
     st.session_state.mode = "login"
-    st.rerun()
+    # No rerun here - Streamlit will naturally refresh on next action
 
 def check_and_award_badges(username, goals, streak_data):
     earned = user_badges.get(username, [])
