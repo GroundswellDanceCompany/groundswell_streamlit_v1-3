@@ -174,8 +174,8 @@ if is_teacher:
             for g in goals:
                 st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
                 comment_key = f"comment_{student}_{g['id']}"
-                if is_teacher:
-        new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
+        if is_teacher:
+                      new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
         if new_comment != g.get("comment", ""):
             g["comment"] = new_comment
             save_json(GOALS_FILE, user_goals)
