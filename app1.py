@@ -109,7 +109,7 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
         else:
             st.error("Invalid login.")
     if st.button("Sign Up"):
-    st.session_state.mode = "signup";
+       st.session_state.mode = "signup";
     if st.button("Reset Password"):
     st.session_state.mode = "reset";
 
@@ -129,7 +129,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
             st.session_state.mode = "login"
             st.rerun()
     if st.button("Back"):
-    st.session_state.mode = "login";
+       st.session_state.mode = "login";
 
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
     st.title("Reset Password")
@@ -146,7 +146,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         else:
             st.error("User not found.")
     if st.button("Back"):
-    st.session_state.mode = "login";
+       st.session_state.mode = "login";
 
 # --- Main App (Logged In) ---
 elif st.session_state.logged_in:
