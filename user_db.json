@@ -1,7 +1,0 @@
-{
-  "teacher": {
-    "password": "adminpass",
-    "role": "admin",
-    "groups": []
-  }
-}
