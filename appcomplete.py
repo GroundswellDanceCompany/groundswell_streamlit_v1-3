@@ -254,6 +254,7 @@ elif st.session_state.logged_in:
                         })
                         user_goals[user] = goals
                         save_json(GOALS_FILE, user_goals)
+                        st.session_state.template_added = str(uuid.uuid4())  # trigger rerun safely
 
         with tabs[2]:
             st.subheader("Upload Progress Videos")
