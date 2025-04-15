@@ -213,8 +213,10 @@ elif st.session_state.logged_in:
                                 last = streak.get("last_completion_date")
                                 if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
                                     streak["streak"] += 1
-                                elif last != today:
-                                streak["streak"] = 1
+                                else:
+                                    if last != today:
+                                        streak["streak"] = 1
+                                        
                                 streak["last_completion_date"] = today
                                 user_streaks[user] = streak
                                 save_json(GOALS_FILE, user_goals)
