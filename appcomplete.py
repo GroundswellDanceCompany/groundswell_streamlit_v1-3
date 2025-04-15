@@ -205,19 +205,22 @@ elif st.session_state.logged_in:
                             st.markdown(f"_Teacher Comment:_ {g['comment']}")
                     with col2:
                         if st.checkbox("Done", value=g["done"], key=f"today_{g['id']}"):
-                            g["done"] = True
-                            g["completed_on"] = today
-                            last = streak.get("last_completion_date")
-                            if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
-                            streak["streak"] += 1
-                            elif last != today:
-                            streak["streak"] = 1
-                            streak["last_completion_date"] = today
-                            user_streaks[user] = streak
-                            save_json(GOALS_FILE, user_goals)
-                            save_json(STREAKS_FILE, user_streaks)
-                            check_and_award_badges(user, goals, streak)
-                            st.session_state.goal_updated = str(uuid.uuid4())
+                            if not g["done"]:
+                                today_date = datetime.date.today().isoformat()
+                                g["done"] = True
+                                g["completed_on"] = today
+                            
+                                last = streak.get("last_completion_date")
+                                if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
+                                    streak["streak"] += 1
+                                elif last != today:
+                                streak["streak"] = 1
+                                streak["last_completion_date"] = today
+                                user_streaks[user] = streak
+                                save_json(GOALS_FILE, user_goals)
+                                save_json(STREAKS_FILE, user_streaks)
+                                check_and_award_badges(user, goals, streak)
+                                st.session_state.goal_updated = str(uuid.uuid4())
     else:
         st.title("My Dashboard")
 
