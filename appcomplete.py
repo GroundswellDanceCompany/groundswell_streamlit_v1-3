@@ -189,6 +189,35 @@ elif st.session_state.logged_in:
                         g["comment"] = new_comment
                         save_json(GOALS_FILE, user_goals)
 
+        with tabs[3]:
+            st.subheader("Today's Goals")
+            today = datetime.date.today().isoformat()
+            todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
+
+            if not todays_goals:
+                st.info("No goals due today — you're all caught up!")
+            else:
+                for g in todays_goals:
+                    col1, col2 = st.columns([0.8, 0.2])
+                    with col1:
+                        st.markdown(f"**{g['text']}** — {g['category']}")
+                        if "comment" in g:
+                            st.markdown(f"_Teacher Comment:_ {g['comment']}")
+                    with col2:
+                        if st.checkbox("Done", value=g["done"], key=f"today_{g['id']}"):
+                            g["done"] = True
+                            g["completed_on"] = today
+                            last = streak.get("last_completion_date")
+                            if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
+                            streak["streak"] += 1
+                            elif last != today:
+                            streak["streak"] = 1
+                            streak["last_completion_date"] = today
+                            user_streaks[user] = streak
+                            save_json(GOALS_FILE, user_goals)
+                            save_json(STREAKS_FILE, user_streaks)
+                            check_and_award_badges(user, goals, streak)
+                            st.experimental_rerun()
     else:
         st.title("My Dashboard")
 
