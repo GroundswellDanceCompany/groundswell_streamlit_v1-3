@@ -188,41 +188,7 @@ elif st.session_state.logged_in:
                     if new_comment != g.get("comment", ""):
                         g["comment"] = new_comment
                         save_json(GOALS_FILE, user_goals)
-
-        with tabs[3]:
-            st.subheader("Today's Goals")
-            today = datetime.date.today().isoformat()
-            todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
-
-            if not todays_goals:
-                st.info("No goals due today — you're all caught up!")
-            else:
-                for g in todays_goals:
-                    col1, col2 = st.columns([0.8, 0.2])
-                    with col1:
-                        st.markdown(f"**{g['text']}** — {g['category']}")
-                        if "comment" in g:
-                            st.markdown(f"_Teacher Comment:_ {g['comment']}")
-                    with col2:
-                        if st.checkbox("Done", value=g["done"], key=f"today_{g['id']}"):
-                            if not g["done"]:
-                                today_date = datetime.date.today().isoformat()
-                                g["done"] = True
-                                g["completed_on"] = today
-                            
-                                last = streak.get("last_completion_date")
-                                if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
-                                    streak["streak"] += 1
-                                else:
-                                    if last != today:
-                                        streak["streak"] = 1
-                                        
-                                streak["last_completion_date"] = today
-                                user_streaks[user] = streak
-                                save_json(GOALS_FILE, user_goals)
-                                save_json(STREAKS_FILE, user_streaks)
-                                check_and_award_badges(user, goals, streak)
-                                st.session_state.goal_updated = str(uuid.uuid4())
+                        
     else:
         st.title("My Dashboard")
 
@@ -332,3 +298,37 @@ elif st.session_state.logged_in:
                                 break
                         else:
                             st.warning(f"Missing file: {video_file}")
+
+       with tabs[3]:  # Today's Goals
+        st.subheader("Today's Goals")
+        today = datetime.date.today().isoformat()
+        todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
+
+        if not todays_goals:
+            st.info("No goals due today — you're all caught up!")
+        else:
+            for g in todays_goals:
+                col1, col2 = st.columns([0.8, 0.2])
+                with col1:
+                    st.markdown(f"**{g['text']}** — {g['category']}")
+                    if "comment" in g:
+                        st.markdown(f"_Teacher Comment:_ {g['comment']}")
+                with col2:
+                    if st.checkbox("Done", value=g["done"], key=f"today_{g['id']}"):
+                        if not g["done"]:
+                            today_date = datetime.date.today().isoformat()
+                            g["done"] = True
+                            g["completed_on"] = today_date
+                            last = streak.get("last_completion_date")
+                            if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
+                                streak["streak"] += 1
+                            else:
+                                last != today_date:
+                                 streak["streak"] = 1
+                           
+                            streak["last_completion_date"] = today_date
+                            user_streaks[user] = streak
+                            save_json(GOALS_FILE, user_goals)
+                            save_json(STREAKS_FILE, user_streaks)
+                            check_and_award_badges(user, goals, streak)
+                            st.session_state.goal_updated = str(uuid.uuid4())  # Safe refresh
