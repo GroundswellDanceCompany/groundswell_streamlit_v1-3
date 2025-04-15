@@ -217,7 +217,7 @@ elif st.session_state.logged_in:
                             save_json(GOALS_FILE, user_goals)
                             save_json(STREAKS_FILE, user_streaks)
                             check_and_award_badges(user, goals, streak)
-                            st.experimental_rerun()
+                            st.session_state.goal_updated = str(uuid.uuid4())
     else:
         st.title("My Dashboard")
 
