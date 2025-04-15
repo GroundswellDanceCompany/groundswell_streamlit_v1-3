@@ -319,11 +319,12 @@ elif st.session_state.logged_in:
                              today_date = datetime.date.today().isoformat()
                              g["done"] = True
                              g["completed_on"] = today_date
+                             
                              last = streak.get("last_completion_date")
                              if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
                                  streak["streak"] += 1
                              else:
-                                 last != today_date:
+                                 if last != today_date:
                                   streak["streak"] = 1
                            
                              streak["last_completion_date"] = today_date
