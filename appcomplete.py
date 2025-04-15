@@ -257,7 +257,7 @@ elif st.session_state.logged_in:
                             user_goals[user] = goals
                             save_json(GOALS_FILE, user_goals)
                             st.success("Goal added!")
-                            st.experimental_rerun()  # <--- this makes the goal show instantly
+                            goals = user_goals.get(user, [])  # <-- refresh the goal list right after saving
 
         with tabs[2]:
             st.subheader("Upload Progress Videos")
