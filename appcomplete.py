@@ -246,15 +246,16 @@ elif st.session_state.logged_in:
             my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
             for t in my_templates:
                 with st.expander(f"{t['text']} ({t['category']})"):
-                    goal_date = st.date_input(f"Date for: {t['text']}", datetime.date.today(), key=t["id"])
-                    if st.button(f"Add to My Goals", key=f"add_{t['id']}"):
-                        goals.append({
-                            "id": str(uuid.uuid4()), "text": t['text'], "category": t['category'],
-                            "target_date": str(goal_date), "done": False, "videos": []
-                        })
-                        user_goals[user] = goals
-                        save_json(GOALS_FILE, user_goals)
-                        st.session_state.template_added = str(uuid.uuid4())  # trigger rerun safely
+                    with st.form(f"form_{t['id']}"):
+                        goal_date = st.date_input("Target Date", datetime.date.today())
+                        submitted = st.form_submit_button("Add to My Goals")
+                        if submitted:
+                            goals.append({
+                                "id": str(uuid.uuid4()), "text": t['text'], "category": t['category'],
+                                "target_date": str(goal_date), "done": False, "videos": []
+                            })
+                            user_goals[user] = goals
+                            save_json(GOALS_FILE, user_goals)
 
         with tabs[2]:
             st.subheader("Upload Progress Videos")
