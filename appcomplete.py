@@ -192,7 +192,7 @@ elif st.session_state.logged_in:
     else:
         st.title("My Dashboard")
 
-        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", 
+        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Todays Goals",])
         goals = user_goals.get(user, [])
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
         badges = user_badges.get(user, [])
