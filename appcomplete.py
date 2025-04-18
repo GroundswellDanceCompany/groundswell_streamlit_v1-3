@@ -198,43 +198,143 @@ elif st.session_state.logged_in:
                         save_json(GOALS_FILE, user_goals)
                         
     else:
-        st.title("My Dashboard")
+    st.title("My Dashboard")
 
-        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Todays Goals",])
-        goals = user_goals.get(user, [])
-        streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
-        badges = user_badges.get(user, [])
+    tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress"])
+    goals = user_goals.get(user, [])
+    streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
+    badges = user_badges.get(user, [])
 
-        with tabs[0]:
-            st.subheader("My Active Goals")
-            st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
-            if badges:
-                st.markdown("### Badges:")
-                for b in badges:
-                    st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
+    # --- Tab 0: My Goals ---
+    with tabs[0]:
+        st.subheader("My Active Goals")
+        st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
+        if badges:
+            st.markdown("### Badges:")
+            for b in badges:
+                st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
 
-            with st.form("add_goal"):
-                g_text = st.text_input("New Goal")
-                g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
-                g_date = st.date_input("Target Date", datetime.date.today())
-                if st.form_submit_button("Add") and g_text:
-                    goals.append({
-                        "id": str(uuid.uuid4()),
-                        "text": g_text,
-                        "category": g_cat,
-                        "target_date": str(g_date),
-                        "done": False,
-                        "videos": [],
-                        "created_on": str(datetime.date.today())  # ← ADD THIS
+        with st.form("add_goal"):
+            g_text = st.text_input("New Goal")
+            g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
+            g_date = st.date_input("Target Date", datetime.date.today())
+            if st.form_submit_button("Add") and g_text:
+                goals.append({
+                    "id": str(uuid.uuid4()), "text": g_text, "category": g_cat,
+                    "target_date": str(g_date), "done": False, "videos": [],
+                    "created_on": str(datetime.date.today())
+                })
+                user_goals[user] = goals
+                save_json(GOALS_FILE, user_goals)
+
+        for g in goals:
+            col1, col2 = st.columns([0.8, 0.2])
+            with col1:
+                st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
+
+                # Progress bar
+                created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                target = datetime.date.fromisoformat(g["target_date"])
+                total_days = (target - created).days or 1
+                elapsed_days = (datetime.date.today() - created).days
+                progress = min(max(elapsed_days / total_days, 0), 1.0)
+                st.progress(progress)
+                st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+
+                if "comment" in g:
+                    st.markdown(f"_Teacher Comment:_ {g['comment']}")
+            with col2:
+                if st.checkbox("Done", value=g["done"], key=g["id"]):
+                    today = datetime.date.today().isoformat()
+                    if not g["done"]:
+                        g["done"] = True
+                        g["completed_on"] = today
+                        last = streak.get("last_completion_date")
+                        if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
+                            streak["streak"] += 1
+                        elif last != today:
+                            streak["streak"] = 1
+                        streak["last_completion_date"] = today
+                        user_streaks[user] = streak
+                        save_json(GOALS_FILE, user_goals)
+                        save_json(STREAKS_FILE, user_streaks)
+                        check_and_award_badges(user, goals, streak)
+
+    # --- Tab 1: Templates for Me ---
+    with tabs[1]:
+        st.subheader("Templates for You")
+        my_groups = user_info.get("groups", [])
+        my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
+        for t in my_templates:
+            with st.expander(f"{t['text']} ({t['category']})"):
+                with st.form(f"form_{t['id']}"):
+                    goal_date = st.date_input("Target Date", datetime.date.today())
+                    submitted = st.form_submit_button("Add to My Goals")
+                    if submitted:
+                        goals.append({
+                            "id": str(uuid.uuid4()), "text": t['text'], "category": t['category'],
+                            "target_date": str(goal_date), "done": False, "videos": [],
+                            "created_on": str(datetime.date.today())
+                        })
+                        user_goals[user] = goals
+                        save_json(GOALS_FILE, user_goals)
+
+    # --- Tab 2: Upload Videos ---
+    with tabs[2]:
+        st.subheader("Upload Progress Videos")
+        for g in goals:
+            st.markdown(f"### {g['text']}")
+            video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
+            uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
+            if uploaded and video_label:
+                if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
+                    vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
+                    video_path = os.path.join(VIDEO_DIR, vid_filename)
+                    with open(video_path, "wb") as f:
+                        f.write(uploaded.getbuffer())
+                    g.setdefault("videos", []).append({
+                        "filename": video_path,
+                        "label": video_label,
+                        "uploaded": str(datetime.datetime.now())
                     })
-                    user_goals[user] = goals
+                    st.success(f"Video '{video_label}' uploaded.")
                     save_json(GOALS_FILE, user_goals)
 
-            for g in goals:
+            if g.get("videos"):
+                st.markdown("### Uploaded Videos")
+                for i, v in enumerate(g["videos"]):
+                    video_file = v["filename"]
+                    label = v.get("label", f"Video {i+1}")
+                    if os.path.exists(video_file):
+                        st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
+                        st.video(video_file)
+                        if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
+                            try:
+                                os.remove(video_file)
+                            except:
+                                pass
+                            del g["videos"][i]
+                            save_json(GOALS_FILE, user_goals)
+                            st.success(f"Deleted {label}")
+                            break
+                    else:
+                        st.warning(f"Missing file: {video_file}")
+
+    # --- Tab 3: Today's Goals ---
+    with tabs[3]:
+        st.subheader("Today's Goals")
+        today = datetime.date.today().isoformat()
+        todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
+
+        if not todays_goals:
+            st.info("No goals due today — you're all caught up!")
+        else:
+            for g in todays_goals:
                 col1, col2 = st.columns([0.8, 0.2])
                 with col1:
-                    st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
-                    # Progress Bar
+                    st.markdown(f"**{g['text']}** — {g['category']}")
+
+                    # Progress bar
                     created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
                     target = datetime.date.fromisoformat(g["target_date"])
                     total_days = (target - created).days or 1
@@ -242,143 +342,57 @@ elif st.session_state.logged_in:
                     progress = min(max(elapsed_days / total_days, 0), 1.0)
                     st.progress(progress)
                     st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+
                     if "comment" in g:
                         st.markdown(f"_Teacher Comment:_ {g['comment']}")
                 with col2:
-                    if st.checkbox("Done", value=g["done"], key=g["id"]):
-                        today = datetime.date.today().isoformat()
+                    if st.checkbox("Done", value=g["done"], key=f"today_{g['id']}"):
                         if not g["done"]:
+                            today_date = datetime.date.today().isoformat()
                             g["done"] = True
-                            g["completed_on"] = today
+                            g["completed_on"] = today_date
                             last = streak.get("last_completion_date")
                             if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
                                 streak["streak"] += 1
-                            elif last != today:
+                            elif last != today_date:
                                 streak["streak"] = 1
-                            streak["last_completion_date"] = today
+                            streak["last_completion_date"] = today_date
                             user_streaks[user] = streak
                             save_json(GOALS_FILE, user_goals)
                             save_json(STREAKS_FILE, user_streaks)
                             check_and_award_badges(user, goals, streak)
+                            st.session_state.goal_updated = str(uuid.uuid4())
 
-        with tabs[1]:
-            st.subheader("Templates for You")
-            my_groups = user_info.get("groups", [])
-            my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
-            for t in my_templates:
-                with st.expander(f"{t['text']} ({t['category']})"):
-                    with st.form(f"form_{t['id']}"):
-                        goal_date = st.date_input("Target Date", datetime.date.today())
-                        submitted = st.form_submit_button("Add to My Goals")
-                        if submitted:
-                            goals.append({
-                                "id": str(uuid.uuid4()), "text": t['text'], "category": t['category'],
-                                "target_date": str(goal_date), "done": False, "videos": []
-                            })
-                            user_goals[user] = goals
-                            save_json(GOALS_FILE, user_goals)
-                            st.success("Goal added!")
-                            goals = user_goals.get(user, [])  # <-- refresh the goal list right after saving
+    # --- Tab 4: My Progress ---
+    with tabs[4]:
+        st.subheader("My Progress Overview")
 
-        with tabs[2]:
-            st.subheader("Upload Progress Videos")
-            for g in goals:
-                st.markdown(f"### {g['text']}")
-                video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
-                uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
-                if uploaded and video_label:
-                    if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
-                        vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
-                        video_path = os.path.join(VIDEO_DIR, vid_filename)
-                        with open(video_path, "wb") as f:
-                            f.write(uploaded.getbuffer())
-                        g.setdefault("videos", []).append({
-                            "filename": video_path,
-                            "label": video_label,
-                            "uploaded": str(datetime.datetime.now())
-                        })
-                        st.success(f"Video '{video_label}' uploaded.")
-                        save_json(GOALS_FILE, user_goals)
+        today = datetime.date.today()
+        last_week = today - datetime.timedelta(days=7)
+        completed_goals = [
+            g for g in goals
+            if g.get("done") and g.get("completed_on") and
+            datetime.date.fromisoformat(g["completed_on"]) >= last_week
+        ]
 
-                if g.get("videos"):
-                    st.markdown("### Uploaded Videos")
-                    for i, v in enumerate(g["videos"]):
-                        video_file = v["filename"]
-                        label = v.get("label", f"Video {i+1}")
-                        if os.path.exists(video_file):
-                            st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
-                            st.video(video_file)
-                            if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
-                                try:
-                                    os.remove(video_file)
-                                except:
-                                    pass
-                                del g["videos"][i]
-                                save_json(GOALS_FILE, user_goals)
-                                st.success(f"Deleted {label}")
-                                break
-                        else:
-                            st.warning(f"Missing file: {video_file}")
+        if completed_goals:
+            st.markdown("### Goals Completed This Week")
+            for g in completed_goals:
+                st.markdown(f"- **{g['text']}** ({g['category']}) — completed on {g['completed_on']}")
+        else:
+            st.info("No goals completed this week. Let’s go!")
 
-        with tabs[3]:  # Today's Goals
-         st.subheader("Today's Goals")
-         today = datetime.date.today().isoformat()
-         todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
+        st.markdown("### Streak Status")
+        st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
 
-         if not todays_goals:
-             st.info("No goals due today — you're all caught up!")
-         else:
-             for g in todays_goals:
-                 col1, col2 = st.columns([0.8, 0.2])
-                 with col1:
-                     st.markdown(f"**{g['text']}** — {g['category']}")
-                     if "comment" in g:
-                         st.markdown(f"_Teacher Comment:_ {g['comment']}")
-                 with col2:
-                     if st.checkbox("Done", value=g["done"], key=f"today_{g['id']}"):
-                         if not g["done"]:
-                             today_date = datetime.date.today().isoformat()
-                             g["done"] = True
-                             g["completed_on"] = today_date
-                             
-                             last = streak.get("last_completion_date")
-                             if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
-                                 streak["streak"] += 1
-                             else:
-                                 if last != today_date:
-                                  streak["streak"] = 1
-                           
-                             streak["last_completion_date"] = today_date
-                             user_streaks[user] = streak
-                             save_json(GOALS_FILE, user_goals)
-                             save_json(STREAKS_FILE, user_streaks)
-                             check_and_award_badges(user, goals, streak)
-                             st.session_state.goal_updated = str(uuid.uuid4())  # Safe refresh
+        st.markdown("### Badges Earned")
+        if badges:
+            for b in badges:
+                st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
+        else:
+            st.caption("No badges earned yet — keep going!")
 
-        with tabs[4]:
-            st.subheader("My Progress Overview")
-
-            today = datetime.date.today()
-            last_week = today - datetime.timedelta(days=7)
-            completed_goals = [
-                g for g in goals
-                if g.get("done") and g.get("completed_on") and
-                datetime.date.fromisoformat(g["completed_on"]) >= last_week
-            ]
-
-            if completed_goals:
-                st.markdown("### Goals Completed This Week")
-                for g in completed_goals:
-                    st.markdown(f"- **{g['text']}** ({g['category']}) — completed on {g['completed_on']}")
-            else:
-                st.info("No goals completed this week. Let’s go!")
-
-            st.markdown("### Streak Status")
-            st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
-
-            st.markdown("### Badges Earned")
-            if badges:
-                for b in badges:
-                    st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
-            else:
-                st.caption("No badges earned yet — keep going!")
+        
+         
+        
+                
