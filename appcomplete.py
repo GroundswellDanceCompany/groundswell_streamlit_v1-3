@@ -183,6 +183,14 @@ elif st.session_state.logged_in:
                 st.markdown(f"### {student}")
                 for g in goals:
                     st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
+                    # Progress Bar
+                    created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                    target = datetime.date.fromisoformat(g["target_date"])
+                    total_days = (target - created).days or 1
+                    elapsed_days = (datetime.date.today() - created).days
+                    progress = min(max(elapsed_days / total_days, 0), 1.0)
+                    st.progress(progress)
+                    st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
                     comment_key = f"comment_{student}_{g['id']}"
                     new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
                     if new_comment != g.get("comment", ""):
@@ -226,6 +234,14 @@ elif st.session_state.logged_in:
                 col1, col2 = st.columns([0.8, 0.2])
                 with col1:
                     st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
+                    # Progress Bar
+                    created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                    target = datetime.date.fromisoformat(g["target_date"])
+                    total_days = (target - created).days or 1
+                    elapsed_days = (datetime.date.today() - created).days
+                    progress = min(max(elapsed_days / total_days, 0), 1.0)
+                    st.progress(progress)
+                    st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
                     if "comment" in g:
                         st.markdown(f"_Teacher Comment:_ {g['comment']}")
                 with col2:
@@ -308,13 +324,6 @@ elif st.session_state.logged_in:
          st.subheader("Today's Goals")
          today = datetime.date.today().isoformat()
          todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
-         created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
-         target = datetime.date.fromisoformat(g["target_date"])
-         total_days = (target - created).days or 1  # avoid division by zero
-         elapsed_days = (datetime.date.today() - created).days
-         progress = min(max(elapsed_days / total_days, 0), 1.0)
-
-         st.progress(progress)
 
          if not todays_goals:
              st.info("No goals due today — you're all caught up!")
