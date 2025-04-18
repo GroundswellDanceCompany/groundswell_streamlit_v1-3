@@ -211,8 +211,13 @@ elif st.session_state.logged_in:
                 g_date = st.date_input("Target Date", datetime.date.today())
                 if st.form_submit_button("Add") and g_text:
                     goals.append({
-                        "id": str(uuid.uuid4()), "text": g_text, "category": g_cat,
-                        "target_date": str(g_date), "done": False, "videos": []
+                        "id": str(uuid.uuid4()),
+                        "text": g_text,
+                        "category": g_cat,
+                        "target_date": str(g_date),
+                        "done": False,
+                        "videos": [],
+                        "created_on": str(datetime.date.today())  # ← ADD THIS
                     })
                     user_goals[user] = goals
                     save_json(GOALS_FILE, user_goals)
