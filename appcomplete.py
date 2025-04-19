@@ -150,9 +150,9 @@ elif st.session_state.logged_in:
     st.sidebar.button("Logout", on_click=logout)
 
     if is_teacher:
+        # Teacher Dashboard Tabs — ONLY for teachers
         st.title("Teacher Dashboard")
-
-        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress"])
+        tabs = st.tabs(["Create Templates", "View Templates", "Student Goals & Comments"])
 
         with tabs[0]:
             st.subheader("Create Goal Template")
@@ -198,7 +198,9 @@ elif st.session_state.logged_in:
                         save_json(GOALS_FILE, user_goals)
                         
     else:
+        # Student Dashboard Tabs — ONLY for students
         st.title("My Dashboard")
+        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress"])
 
         tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress"])
         goals = user_goals.get(user, [])
