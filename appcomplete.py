@@ -202,23 +202,23 @@ elif st.session_state.logged_in:
                     g["comment"] = new_comment
                     save_json(GOALS_FILE, user_goals)
 
-            with tabs[2]:
-            st.subheader("Student Goals + Comments")
-            for student, goals in user_goals.items():
-                st.markdown(f"### {student}")
-                for g in goals:
-                    ...
-            # Debug test
-            # st.markdown(goals)  ← this would now throw NameError
+            with tabs[3]:
+                st.subheader("Student Goals + Comments")
+                for student, goals in user_goals.items():
+                    st.markdown(f"### {student}")
+                    for g in goals:
+                        ...
+                # Debug test
+                # st.markdown(goals)  ← this would now throw NameError
 
-        with tabs[2]:
-            st.subheader("Class Resources (Teacher Uploads)")
-            uploaded = st.file_uploader("Upload instructional video", type=["mp4", "mov"])
-            if uploaded:
-                filepath = os.path.join("teacher_videos", uploaded.name)
-                with open(filepath, "wb") as f:
-                    f.write(uploaded.getbuffer())
-                st.success("Video uploaded successfully.")
+            with tabs[2]:
+                st.subheader("Class Resources (Teacher Uploads)")
+                uploaded = st.file_uploader("Upload instructional video", type=["mp4", "mov"])
+                if uploaded:
+                    filepath = os.path.join("teacher_videos", uploaded.name)
+                    with open(filepath, "wb") as f:
+                        f.write(uploaded.getbuffer())
+                    st.success("Video uploaded successfully.")
                         
     else:
         # Student Dashboard Tabs — ONLY for students
