@@ -184,8 +184,8 @@ elif st.session_state.logged_in:
             else:
                 st.info("No student goals available.")
 
-        with tabs[3]:
-        # --- Tab 3: Class Resources (Video Uploads) ---
+        
+        
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
 
