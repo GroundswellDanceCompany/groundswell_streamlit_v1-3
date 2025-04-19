@@ -213,7 +213,7 @@ elif st.session_state.logged_in:
     else:
         # Student Dashboard Tabs — ONLY for students
         st.title("My Dashboard")
-        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress"])
+        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress Overview"])
         goals = user_goals.get(user, [])
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
         badges = user_badges.get(user, [])
@@ -377,7 +377,7 @@ elif st.session_state.logged_in:
                             check_and_award_badges(user, goals, streak)
                             st.session_state.goal_updated = str(uuid.uuid4())
 
-   # --- Tab 4: My Progress ---
+        # --- Tab 4: My Progress ---
         with tabs[4]:
             st.subheader("My Progress Overview")
 
