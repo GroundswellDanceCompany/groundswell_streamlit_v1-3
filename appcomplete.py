@@ -152,7 +152,7 @@ elif st.session_state.logged_in:
     if is_teacher:
         # Teacher Dashboard Tabs — ONLY for teachers
         st.title("Teacher Dashboard")
-        tabs = st.tabs(["Create Templates", "All Templates", "Student Goals & Comments"])
+        tabs = st.tabs(["Create Templates", "All Templates", "Student Goals & Comments", "Class Resources (Teacher Uploads)"])
 
         with tabs[0]:
             st.subheader("Create Goal Template")
@@ -202,7 +202,7 @@ elif st.session_state.logged_in:
                     g["comment"] = new_comment
                     save_json(GOALS_FILE, user_goals)
 
-            with tabs[3]:
+            with tabs[2]:
                 st.subheader("Student Goals + Comments")
                 for student, goals in user_goals.items():
                     st.markdown(f"### {student}")
@@ -211,7 +211,7 @@ elif st.session_state.logged_in:
                 # Debug test
                 # st.markdown(goals)  ← this would now throw NameError
 
-            with tabs[2]:
+            with tabs[3]:
                 st.subheader("Class Resources (Teacher Uploads)")
                 uploaded = st.file_uploader("Upload instructional video", type=["mp4", "mov"])
                 if uploaded:
