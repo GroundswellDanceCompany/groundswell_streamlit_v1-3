@@ -152,7 +152,7 @@ elif st.session_state.logged_in:
     if is_teacher:
         # Teacher Dashboard Tabs — ONLY for teachers
         st.title("Teacher Dashboard")
-        tabs = st.tabs(["Create Templates", "View Templates", "Student Goals & Comments"])
+        tabs = st.tabs(["Create Templates", "All Templates", "Student Goals & Comments"])
 
         with tabs[0]:
             st.subheader("Create Goal Template")
