@@ -184,7 +184,7 @@ elif st.session_state.logged_in:
             student_goals = user_goals.get(selected_student, [])
 
             st.markdown(f"### {selected_student}")
-            for g in student_goals:
+            for t in templates:
                 st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
 
                 # Optional: Progress Bar
@@ -201,15 +201,6 @@ elif st.session_state.logged_in:
                 if new_comment != g.get("comment", ""):
                     g["comment"] = new_comment
                     save_json(GOALS_FILE, user_goals)
-
-            with tabs[2]:
-                st.subheader("Student Goals + Comments")
-                for student, goals in user_goals.items():
-                    st.markdown(f"### {student}")
-                    for g in goals:
-                        ...
-                # Debug test
-                # st.markdown(goals)  ← this would now throw NameError
 
             with tabs[3]:
                 st.subheader("Class Resources (Teacher Uploads)")
