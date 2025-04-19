@@ -196,7 +196,7 @@ elif st.session_state.logged_in:
 
 # Student dashboard goes here...
 
-else:
+    else:
         # STUDENT DASHBOARD
         st.title("My Dashboard")
         tabs = st.tabs([
