@@ -205,6 +205,7 @@ else:
             "Upload Videos",
             "Today's Goals",
             "My Progress"
+            "Class Resources from Teacher"
         ])
 
         goals = user_goals.get(user, [])
