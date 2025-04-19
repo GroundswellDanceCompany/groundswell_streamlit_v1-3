@@ -185,14 +185,58 @@ elif st.session_state.logged_in:
                 st.info("No student goals available.")
 
         with tabs[3]:
+        # --- Tab 3: Class Resources (Video Uploads) ---
+        with tabs[3]:
             st.subheader("Upload Class Resource Videos")
+
+            teacher_videos_file = "teacher_videos.json"
+            teacher_videos = load_json(teacher_videos_file, [])
+
+            # Upload section
+            video_label = st.text_input("Video Label")
+            video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
             uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
-            if uploaded:
-                filepath = os.path.join(CLASS_VIDEO_DIR, uploaded.name)
-                with open(filepath, "wb") as f:
-                    f.write(uploaded.getbuffer())
-                st.success("Video uploaded successfully.")
-                st.video(filepath)
+
+            if uploaded and video_label and video_class:
+                if st.button("Upload Video"):
+                    filename = f"{uuid.uuid4().hex}_{uploaded.name}"
+                    filepath = os.path.join(CLASS_VIDEO_DIR, filename)
+                    with open(filepath, "wb") as f:
+                        f.write(uploaded.getbuffer())
+
+                    video_entry = {
+                        "label": video_label,
+                        "class": video_class,
+                        "filename": filepath,
+                        "uploaded": str(datetime.datetime.now())
+                    }
+                    teacher_videos.append(video_entry)
+                    save_json(teacher_videos_file, teacher_videos)
+                    st.success("Video uploaded successfully.")
+
+            # Viewing section
+            st.markdown("### Class Video Library")
+            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
+            filtered_videos = [v for v in teacher_videos if v["class"] == selected_class]
+
+            if not filtered_videos:
+                st.info("No videos uploaded for this class.")
+            else:
+                for i, v in enumerate(filtered_videos):
+                    st.markdown(f"**{v['label']}** — uploaded {v['uploaded']}")
+                    if os.path.exists(v["filename"]):
+                        st.video(v["filename"])
+                        if st.button(f"Delete {v['label']}", key=f"del_teacher_video_{i}"):
+                            try:
+                                os.remove(v["filename"])
+                            except:
+                                pass
+                            teacher_videos.remove(v)
+                            save_json(teacher_videos_file, teacher_videos)
+                            st.success(f"Deleted {v['label']}")
+                            st.experimental_rerun()
+                    else:
+                        st.warning("File not found.")
 
 # Student dashboard goes here...
 
