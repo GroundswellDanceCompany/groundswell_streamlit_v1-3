@@ -150,84 +150,84 @@ elif st.session_state.logged_in:
     st.sidebar.button("Logout", on_click=logout)
 
     if is_teacher:
-    st.title("Teacher Dashboard")
+        st.title("Teacher Dashboard")
 
-tabs = st.tabs([
-    "Create Templates",
-    "All Templates",
-    "Student Goals + Comments",
-    "Class Resources"
-])
+    tabs = st.tabs([
+        "Create Templates",
+        "All Templates",
+        "Student Goals + Comments",
+        "Class Resources"
+    ])
 
-# --- Tab 0: Create Templates ---
-with tabs[0]:
-    st.subheader("Create Goal Template")
-    with st.form("template_form"):
-        text = st.text_input("Goal Text")
-        cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
-        assign = st.multiselect("Assign to Groups", CLASS_GROUPS)
-        if st.form_submit_button("Add") and text:
-            templates.append({
-                "id": str(uuid.uuid4()),
-                "text": text,
-                "category": cat,
-                "groups": assign
-            })
-            save_json(TEMPLATES_FILE, templates)
-            st.success("Template added.")
+    # --- Tab 0: Create Templates ---
+    with tabs[0]:
+        st.subheader("Create Goal Template")
+        with st.form("template_form"):
+            text = st.text_input("Goal Text")
+            cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
+            assign = st.multiselect("Assign to Groups", CLASS_GROUPS)
+            if st.form_submit_button("Add") and text:
+                templates.append({
+                    "id": str(uuid.uuid4()),
+                    "text": text,
+                    "category": cat,
+                    "groups": assign
+                })
+                save_json(TEMPLATES_FILE, templates)
+                st.success("Template added.")
 
-# --- Tab 1: All Templates ---
-with tabs[1]:
-    st.subheader("All Templates")
-    for i, t in enumerate(templates):
-        st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(t['groups'])}")
-        if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
-            del templates[i]
-            save_json(TEMPLATES_FILE, templates)
-            st.success("Template deleted.")
-            st.experimental_rerun()
+    # --- Tab 1: All Templates ---
+    with tabs[1]:
+        st.subheader("All Templates")
+        for i, t in enumerate(templates):
+            st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(t['groups'])}")
+            if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
+                del templates[i]
+                save_json(TEMPLATES_FILE, templates)
+                st.success("Template deleted.")
+                st.experimental_rerun()
 
-# --- Tab 2: Student Goals + Comments ---
-with tabs[2]:
-    st.subheader("Student Goals + Comments")
+    # --- Tab 2: Student Goals + Comments ---
+    with tabs[2]:
+        st.subheader("Student Goals + Comments")
 
-    selected_student = st.selectbox("Select a student", list(user_goals.keys()))
-    student_goals = user_goals.get(selected_student, [])
+        selected_student = st.selectbox("Select a student", list(user_goals.keys()))
+        student_goals = user_goals.get(selected_student, [])
 
-    st.markdown(f"### {selected_student}")
-    for g in student_goals:
-        st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
+        st.markdown(f"### {selected_student}")
+        for g in student_goals:
+            st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
 
-        # Optional: Progress Bar
-        created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
-        target = datetime.date.fromisoformat(g["target_date"])
-        total_days = (target - created).days or 1
-        elapsed_days = (datetime.date.today() - created).days
-        progress = min(max(elapsed_days / total_days, 0), 1.0)
-        st.progress(progress)
-        st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+            # Optional: Progress Bar
+            created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+            target = datetime.date.fromisoformat(g["target_date"])
+            total_days = (target - created).days or 1
+            elapsed_days = (datetime.date.today() - created).days
+            progress = min(max(elapsed_days / total_days, 0), 1.0)
+            st.progress(progress)
+            st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
 
-        comment_key = f"comment_{selected_student}_{g['id']}"
-        new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
-        if new_comment != g.get("comment", ""):
-            g["comment"] = new_comment
-            save_json(GOALS_FILE, user_goals)
+            comment_key = f"comment_{selected_student}_{g['id']}"
+            new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
+            if new_comment != g.get("comment", ""):
+                g["comment"] = new_comment
+                save_json(GOALS_FILE, user_goals)
 
-# --- Tab 3: Class Resources (Video Uploads) ---
-with tabs[3]:
-    st.subheader("Upload Class Resource Videos")
+    # --- Tab 3: Class Resources (Video Uploads) ---
+    with tabs[3]:
+        st.subheader("Upload Class Resource Videos")
 
-    uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
-    if uploaded:
-        class_video_dir = "teacher_videos"
-        os.makedirs(class_video_dir, exist_ok=True)
-        filepath = os.path.join(class_video_dir, uploaded.name)
+        uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
+        if uploaded:
+            class_video_dir = "teacher_videos"
+            os.makedirs(class_video_dir, exist_ok=True)
+            filepath = os.path.join(class_video_dir, uploaded.name)
 
-        with open(filepath, "wb") as f:
-            f.write(uploaded.getbuffer())
+            with open(filepath, "wb") as f:
+                f.write(uploaded.getbuffer())
 
-        st.success("Video uploaded successfully.")
-        st.video(filepath)
+            st.success("Video uploaded successfully.")
+            st.video(filepath)
                         
     else:
         # Student Dashboard Tabs — ONLY for students
