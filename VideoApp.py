@@ -246,7 +246,7 @@ elif st.session_state.logged_in:
             "Templates for Me",
             "Upload Videos",
             "Today's Goals",
-            "My Progress"
+            "My Progress",
             "Class Resources"
         ])
 
