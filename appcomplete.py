@@ -149,6 +149,7 @@ elif st.session_state.logged_in:
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
 
+    if is_teacher:
     st.title("Teacher Dashboard")
 
 tabs = st.tabs([
