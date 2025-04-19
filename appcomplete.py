@@ -184,7 +184,7 @@ elif st.session_state.logged_in:
             student_goals = user_goals.get(selected_student, [])
 
             st.markdown(f"### {selected_student}")
-            for t in templates:
+            for g in goals:
                 st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
 
                 # Optional: Progress Bar
