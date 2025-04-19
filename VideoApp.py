@@ -247,7 +247,7 @@ elif st.session_state.logged_in:
             "Upload Videos",
             "Today's Goals",
             "My Progress"
-            "Class Resources from Teacher"
+            "Class Resources"
         ])
 
         goals = user_goals.get(user, [])
