@@ -201,6 +201,15 @@ elif st.session_state.logged_in:
                 if new_comment != g.get("comment", ""):
                     g["comment"] = new_comment
                     save_json(GOALS_FILE, user_goals)
+
+            with tabs[2]:
+            st.subheader("Student Goals + Comments")
+            for student, goals in user_goals.items():
+                st.markdown(f"### {student}")
+                for g in goals:
+                    ...
+            # Debug test
+            # st.markdown(goals)  ← this would now throw NameError
                         
     else:
         # Student Dashboard Tabs — ONLY for students
