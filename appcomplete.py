@@ -210,6 +210,15 @@ elif st.session_state.logged_in:
                     ...
             # Debug test
             # st.markdown(goals)  ← this would now throw NameError
+
+        with tabs[2]:
+            st.subheader("Class Resources (Teacher Uploads)")
+            uploaded = st.file_uploader("Upload instructional video", type=["mp4", "mov"])
+            if uploaded:
+                filepath = os.path.join("teacher_videos", uploaded.name)
+                with open(filepath, "wb") as f:
+                    f.write(uploaded.getbuffer())
+                st.success("Video uploaded successfully.")
                         
     else:
         # Student Dashboard Tabs — ONLY for students
