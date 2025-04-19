@@ -179,9 +179,9 @@ elif st.session_state.logged_in:
 
         with tabs[2]:
             st.subheader("Student Goals + Comments")
-             # This line must be here BEFORE anything references selected_student
-    selected_student = st.selectbox("Select a student", list(user_goals.keys()))
-    student_goals = user_goals.get(selected_student, [])
+            # This line must be here BEFORE anything references selected_student
+            selected_student = st.selectbox("Select a student", list(user_goals.keys()))
+            student_goals = user_goals.get(selected_student, [])
             st.markdown(f"### {selected_student}")
             for g in student_goals:
                 st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
