@@ -378,34 +378,34 @@ elif st.session_state.logged_in:
                             check_and_award_badges(user, goals, streak)
                             st.session_state.goal_updated = str(uuid.uuid4())
 
-    # --- Tab 4: My Progress ---
-    with tabs[4]:
-        st.subheader("My Progress Overview")
+     # --- Tab 4: My Progress ---
+     with tabs[4]:
+         st.subheader("My Progress Overview")
 
-        today = datetime.date.today()
-        last_week = today - datetime.timedelta(days=7)
-        completed_goals = [
-            g for g in goals
-            if g.get("done") and g.get("completed_on") and
-            datetime.date.fromisoformat(g["completed_on"]) >= last_week
-        ]
+         today = datetime.date.today()
+         last_week = today - datetime.timedelta(days=7)
+         completed_goals = [
+             g for g in goals
+             if g.get("done") and g.get("completed_on") and
+             datetime.date.fromisoformat(g["completed_on"]) >= last_week
+         ]
 
-        if completed_goals:
-            st.markdown("### Goals Completed This Week")
-            for g in completed_goals:
-                st.markdown(f"- **{g['text']}** ({g['category']}) — completed on {g['completed_on']}")
-        else:
-            st.info("No goals completed this week. Let’s go!")
+         if completed_goals:
+             st.markdown("### Goals Completed This Week")
+             for g in completed_goals:
+                 st.markdown(f"- **{g['text']}** ({g['category']}) — completed on {g['completed_on']}")
+         else:
+             st.info("No goals completed this week. Let’s go!")
 
-        st.markdown("### Streak Status")
-        st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
+         st.markdown("### Streak Status")
+         st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
 
-        st.markdown("### Badges Earned")
-        if badges:
-            for b in badges:
-                st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
-        else:
-            st.caption("No badges earned yet — keep going!")
+         st.markdown("### Badges Earned")
+         if badges:
+             for b in badges:
+                 st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
+         else:
+             st.caption("No badges earned yet — keep going!")
 
         
 
