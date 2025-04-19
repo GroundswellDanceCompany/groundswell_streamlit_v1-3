@@ -210,9 +210,10 @@ elif st.session_state.logged_in:
                         f.write(uploaded.getbuffer())
                     st.success("Video uploaded successfully.")
 
-    tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress Overview"])
+        
     else:
         # Student Dashboard Tabs — ONLY for students
+        tabs = st.tabs(["My Goals", "Templates for Me", "Upload Videos", "Today's Goals", "My Progress Overview"])
         st.title("My Dashboard")
         goals = user_goals.get(user, [])
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
