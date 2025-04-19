@@ -296,7 +296,8 @@ elif st.session_state.logged_in:
     # --- Tab 2: Upload Videos ---
     with tabs[2]:
         st.subheader("Upload Progress Videos")
-        for g in goals:
+        student_goals = user_goals.get(selected_student, [])
+        for g in student_goals:
             st.markdown(f"### {g['text']}")
             video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
             uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
