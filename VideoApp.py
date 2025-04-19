@@ -342,7 +342,7 @@ elif st.session_state.logged_in:
             else:
                 st.caption("No badges yet — keep going!")
 
-with tabs[5]:
+        with tabs[5]:
             st.subheader("Class Resources from Teacher")
 
             teacher_videos_file = "teacher_videos.json"
