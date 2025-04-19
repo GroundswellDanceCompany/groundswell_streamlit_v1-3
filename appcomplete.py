@@ -179,23 +179,28 @@ elif st.session_state.logged_in:
 
         with tabs[2]:
             st.subheader("Student Goals + Comments")
-            for student, goals in user_goals.items():
-                st.markdown(f"### {student}")
-                for g in goals:
-                    st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
-                    # Progress Bar
-                    created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
-                    target = datetime.date.fromisoformat(g["target_date"])
-                    total_days = (target - created).days or 1
-                    elapsed_days = (datetime.date.today() - created).days
-                    progress = min(max(elapsed_days / total_days, 0), 1.0)
-                    st.progress(progress)
-                    st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
-                    comment_key = f"comment_{student}_{g['id']}"
-                    new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
-                    if new_comment != g.get("comment", ""):
-                        g["comment"] = new_comment
-                        save_json(GOALS_FILE, user_goals)
+
+            selected_student = st.selectbox("Select a student", list(user_goals.keys()))
+            student_goals = user_goals.get(selected_student, [])
+
+            st.markdown(f"### {selected_student}")
+            for g in student_goals:
+                st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
+
+                # Optional: Progress Bar
+                created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                target = datetime.date.fromisoformat(g["target_date"])
+                total_days = (target - created).days or 1
+                elapsed_days = (datetime.date.today() - created).days
+                progress = min(max(elapsed_days / total_days, 0), 1.0)
+                st.progress(progress)
+                st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+
+                comment_key = f"comment_{selected_student}_{g['id']}"
+                new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
+                if new_comment != g.get("comment", ""):
+                    g["comment"] = new_comment
+                    save_json(GOALS_FILE, user_goals)
                         
     else:
         # Student Dashboard Tabs — ONLY for students
