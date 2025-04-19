@@ -392,6 +392,15 @@ elif st.session_state.logged_in:
         else:
             st.caption("No badges earned yet — keep going!")
 
+        with tabs[2]:
+            st.subheader("Student Goals + Comments")
+            for student, goals in user_goals.items():
+                st.markdown(f"### {student}")
+                for g in goals:
+                    ...
+            # Debug test
+            # st.markdown(goals)  ← this would now throw NameError
+
         
          
         
