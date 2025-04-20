@@ -131,8 +131,7 @@ elif st.session_state.logged_in:
             "Create Templates",
             "All Templates",
             "Student Goals + Comments",
-            "Class Resources"
-        ])
+            "Class Resources" ])
 
         with tabs[0]:
             st.subheader("Create Goal Template")
