@@ -273,7 +273,7 @@ elif st.session_state.logged_in:
         # STUDENT DASHBOARD
         st.title("My Dashboard")
         tabs = st.tabs([
-            "About"
+            "About",
             "My Goals",
             "Templates for Me",
             "Upload Videos",
