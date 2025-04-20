@@ -413,21 +413,4 @@ elif st.session_state.logged_in:
 
             
 
-            with tabs[5]:
-                st.subheader("Class Resources from Teacher")
-
-                teacher_videos_file = "teacher_videos.json"
-                teacher_videos = load_json(teacher_videos_file, [])
-                my_groups = user_info.get("groups", [])
-
-                available_videos = [v for v in teacher_videos if v["class"] in my_groups]
-
-                if not available_videos:
-                    st.info("No videos uploaded yet for your classes.")
-                else:
-                    for i, v in enumerate(available_videos):
-                        st.markdown(f"**{v['label']}** — {v['class']} — uploaded {v['uploaded']}")
-                        if os.path.exists(v["filename"]):
-                            st.video(v["filename"])
-                        else:
-                            st.warning("Video file missing.")
+            
