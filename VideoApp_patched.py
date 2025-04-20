@@ -279,7 +279,8 @@ elif st.session_state.logged_in:
             "Upload Videos",
             "Today's Goals",
             "My Progress",
-            "Class Resources"
+            "Class Resources",
+            "Youtube"
         ])
 
         goals = user_goals.get(user, [])
@@ -481,6 +482,22 @@ elif st.session_state.logged_in:
                                 st.video(v["filename"])
                             else:
                                 st.warning("Video file missing.")
+
+        with tabs[7]:
+            st.subheader("Groundswell on YouTube")
+
+            st.markdown("""
+            Looking for more inspiration or full-length tutorials?
+
+            - [Visit our YouTube Channel](https://www.youtube.com/@yourchannelname)
+            - Watch new choreography, strength routines, and flexibility drills
+            """)
+
+            st.markdown("### Featured Video")
+            st.video("https://www.youtube.com/watch?v=dQw4w9WgXcQ")  # Replace with your video URL
+
+            st.markdown("### Core Playlist")
+            st.markdown("[Hip Hop Foundations](https://www.youtube.com/playlist?list=PLxyz123...)")
 
             
 
