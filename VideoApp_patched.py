@@ -273,6 +273,7 @@ elif st.session_state.logged_in:
         # STUDENT DASHBOARD
         st.title("My Dashboard")
         tabs = st.tabs([
+            "About"
             "My Goals",
             "Templates for Me",
             "Upload Videos",
@@ -286,6 +287,32 @@ elif st.session_state.logged_in:
         badges = user_badges.get(user, [])
 
         with tabs[0]:
+            st.subheader("About the Groundswell Goal Tracker")
+
+            st.markdown("""
+            Welcome to the **Groundswell Goal Tracker** — your personal space to set, track, and celebrate your dance training progress.
+
+            **What you can do here:**
+            - Set goals in areas like Technique, Strength, Flexibility, and Performance
+            - Upload progress videos to track your journey
+            - Complete goals and earn badges
+            - View class resources uploaded by your teachers
+
+            **Badges are awarded for:**
+            - Completing your first goal
+            - Finishing 5 goals
+            - Completing at least one goal in all 4 categories
+            - Building a 3-day streak of goal completion
+
+            **Tips:**
+            - Use the “Today's Goals” tab to stay focused on deadlines
+            - Check “Class Resources” for helpful videos from your teachers
+            - Be consistent — small steps lead to big progress!
+
+            _This platform is built for the Groundswell Dance community — let’s grow together._
+            """)
+
+        with tabs[1]:
             st.subheader("My Active Goals")
             with st.form("add_goal"):
                 g_text = st.text_input("New Goal")
@@ -334,7 +361,7 @@ elif st.session_state.logged_in:
                             save_json(STREAKS_FILE, user_streaks)
                             check_and_award_badges(user, goals, streak)
 
-        with tabs[1]:
+        with tabs[2]:
             st.subheader("Templates for You")
             my_groups = user_info.get("groups", [])
             my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
@@ -356,7 +383,7 @@ elif st.session_state.logged_in:
                             user_goals[user] = goals
                             save_json(GOALS_FILE, user_goals)
 
-        with tabs[2]:
+        with tabs[3]:
             st.subheader("Upload Progress Videos")
             for g in goals:
                 with st.expander(f"{g['text']} ({g['category']})"):
@@ -394,7 +421,7 @@ elif st.session_state.logged_in:
                             else:
                                 st.warning(f"Missing file: {video_file}")
 
-        with tabs[3]:
+        with tabs[4]:
             st.subheader("Today's Goals")
             today = datetime.date.today().isoformat()
             todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
@@ -404,7 +431,7 @@ elif st.session_state.logged_in:
                 for g in todays_goals:
                     st.markdown(f"- **{g['text']}** — {g['category']}")
 
-        with tabs[4]:
+        with tabs[5]:
             st.subheader("My Progress Overview")
             last_week = datetime.date.today() - datetime.timedelta(days=7)
             completed_goals = [
@@ -427,7 +454,7 @@ elif st.session_state.logged_in:
             else:
                 st.caption("No badges yet — keep going!")
                 
-        with tabs[5]:
+        with tabs[6]:
             st.subheader("Class Resources from Teacher")
 
             teacher_videos_file = "teacher_videos.json"
