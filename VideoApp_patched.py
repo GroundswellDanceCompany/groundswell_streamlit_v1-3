@@ -66,7 +66,35 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.username = ""
     st.session_state.mode = "login"
+    
+def check_and_award_badges(username, goals, streak_data):
+    earned = user_badges.get(username, [])
+    done_goals = [g for g in goals if g["done"]]
+    categories = set(g["category"] for g in done_goals)
 
+    # First Goal Completed
+    if len(done_goals) >= 1 and "First Goal Completed" not in earned:
+        earned.append("First Goal Completed")
+        st.success("🏁 Badge Unlocked: First Goal Completed!")
+
+    # Five Goals
+    if len(done_goals) >= 5 and "Goal Getter: 5 Goals Done" not in earned:
+        earned.append("Goal Getter: 5 Goals Done")
+        st.success("⭐ Badge Unlocked: Goal Getter!")
+
+    # All Categories
+    required = {"Technique", "Strength", "Flexibility", "Performance"}
+    if required.issubset(categories) and "Well-Rounded: All Categories" not in earned:
+        earned.append("Well-Rounded: All Categories")
+        st.success("🌈 Badge Unlocked: Well-Rounded!")
+
+    # Streak Badge
+    if streak_data.get("streak", 0) >= 3 and "Streak Star: 3-Day Streak" not in earned:
+        earned.append("Streak Star: 3-Day Streak")
+        st.success("🔥 Badge Unlocked: Streak Star!")
+
+    user_badges[username] = earned
+    save_json(BADGES_FILE, user_badges)
 # --- Login System ---
 if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Goal Tracker")
