@@ -300,6 +300,7 @@ elif st.session_state.logged_in:
                             user_streaks[user] = streak
                             save_json(GOALS_FILE, user_goals)
                             save_json(STREAKS_FILE, user_streaks)
+                            check_and_award_badges(user, goals, streak)
 
         with tabs[1]:
             st.subheader("Templates for You")
