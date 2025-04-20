@@ -127,7 +127,7 @@ elif st.session_state.logged_in:
         # TEACHER DASHBOARD
         st.title("Teacher Dashboard")
 
-        tabs = st.tabs([, "Class Resources"])
+        tabs = st.tabs([
             "Create Templates",
             "All Templates",
             "Student Goals + Comments",
