@@ -362,7 +362,7 @@ elif st.session_state.logged_in:
                     st.markdown(f"- **{g['text']}** — {g['category']}")
 
         with tabs[4]:
-with tabs[5]:
+        with tabs[5]:
             st.subheader("Class Resources from Teacher")
 
             teacher_videos_file = "teacher_videos.json"
