@@ -185,7 +185,11 @@ elif st.session_state.logged_in:
                     del templates[i]
                     save_json(TEMPLATES_FILE, templates)
                     st.success("Template deleted.")
-                    st.experimental_rerun()
+                    st.session_state.template_deleted = True
+
+                if st.session_state.get("template_deleted"):
+                    st.session_state.template_deleted = False
+                    st.rerun()
 
         with tabs[2]:
             st.subheader("Student Goals + Comments")
