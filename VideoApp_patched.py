@@ -360,28 +360,39 @@ elif st.session_state.logged_in:
             st.subheader("Upload Progress Videos")
             for g in goals:
                 with st.expander(f"{g['text']} ({g['category']})"):
-                video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
-                uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
-                if uploaded and video_label:
-                    if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
-                        vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
-                        video_path = os.path.join("videos", vid_filename)
-                        with open(video_path, "wb") as f:
-                            f.write(uploaded.getbuffer())
-                        g.setdefault("videos", []).append({
-                            "filename": video_path,
-                            "label": video_label,
-                            "uploaded": str(datetime.datetime.now())
-                        })
-                        st.success(f"Video '{video_label}' uploaded.")
-                        save_json(GOALS_FILE, user_goals)
-                if g.get("videos"):
-                    for i, v in enumerate(g["videos"]):
-                        video_file = v["filename"]
-                        label = v.get("label", f"Video {i+1}")
-                        if os.path.exists(video_file):
-                            st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
-                            st.video(video_file)
+                    video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
+                    uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
+                    if uploaded and video_label:
+                        if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
+                            vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
+                            video_path = os.path.join("videos", vid_filename)
+                            with open(video_path, "wb") as f:
+                                f.write(uploaded.getbuffer())
+                            g.setdefault("videos", []).append({
+                                "filename": video_path,
+                                "label": video_label,
+                                "uploaded": str(datetime.datetime.now())
+                            })
+                            st.success(f"Video '{video_label}' uploaded.")
+                            save_json(GOALS_FILE, user_goals)
+                    if g.get("videos"):
+                        for i, v in enumerate(g["videos"]):
+                            video_file = v["filename"]
+                            label = v.get("label", f"Video {i+1}")
+                            if os.path.exists(video_file):
+                                st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
+                                st.video(video_file)
+                                if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
+                                    try:
+                                        os.remove(video_file)
+                                    except:
+                                        pass
+                                    del g["videos"][i]
+                                    save_json(GOALS_FILE, user_goals)
+                                    st.success(f"Deleted {label}")
+                                    st.rerun()
+                            else:
+                                st.warning(f"Missing file: {video_file}")
 
         with tabs[3]:
             st.subheader("Today's Goals")
