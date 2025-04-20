@@ -494,7 +494,7 @@ elif st.session_state.logged_in:
             """)
 
             st.markdown("### Featured Video")
-            st.video(https://youtu.be/6-R4oJkjY0s?feature=shared) # Replace with your video URL
+            st.video(https://www.youtube.com/watch?v=6-R4oJkjY0s) # Replace with your video URL
 
             st.markdown("### Core Playlist")
             st.markdown("[Hip Hop Foundations](https://www.youtube.com/playlist?list=PLxyz123...)")
