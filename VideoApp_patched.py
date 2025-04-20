@@ -359,7 +359,7 @@ elif st.session_state.logged_in:
         with tabs[2]:
             st.subheader("Upload Progress Videos")
             for g in goals:
-                st.markdown(f"### {g['text']}")
+                with st.expander(f"{g['text']} ({g['category']})"):
                 video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
                 uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
                 if uploaded and video_label:
