@@ -363,11 +363,11 @@ elif st.session_state.logged_in:
                                 save_json(STREAKS_FILE, user_streaks)
                                 check_and_award_badges(user, goals, streak)
 
-                done_goals = [g for g in goals if g["done"]]
-                if done_goals:
-                    with st.expander("View Completed Goals"):
-                        for g in done_goals:
-                            st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
+            done_goals = [g for g in goals if g["done"]]
+            if done_goals:
+                with st.expander("View Completed Goals"):
+                    for g in done_goals:
+                        st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
 
         with tabs[2]:
             st.subheader("Templates for You")
