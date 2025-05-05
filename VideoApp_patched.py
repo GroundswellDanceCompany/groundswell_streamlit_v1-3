@@ -333,40 +333,41 @@ elif st.session_state.logged_in:
                     save_json(GOALS_FILE, user_goals)
 
             for g in goals:
-                col1, col2 = st.columns([0.8, 0.2])
-                with col1:
-                    st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
-                    if "comment" in g:
-                        st.markdown(f"_Teacher Comment:_ {g['comment']}")
-                    created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
-                    target = datetime.date.fromisoformat(g["target_date"])
-                    total_days = (target - created).days or 1
-                    elapsed_days = (datetime.date.today() - created).days
-                    progress = min(max(elapsed_days / total_days, 0), 1.0)
-                    st.progress(progress)
-                    st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
-                with col2:
-                    if st.checkbox("Done", value=g["done"], key=g["id"]):
-                        today = datetime.date.today().isoformat()
-                        if not g["done"]:
-                            g["done"] = True
-                            g["completed_on"] = today
-                            last = streak.get("last_completion_date")
-                            if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
-                                streak["streak"] += 1
-                            elif last != today:
-                                streak["streak"] = 1
-                            streak["last_completion_date"] = today
-                            user_streaks[user] = streak
-                            save_json(GOALS_FILE, user_goals)
-                            save_json(STREAKS_FILE, user_streaks)
-                            check_and_award_badges(user, goals, streak)
+                if not g.get("done", False):  # Only show incomplete goals
+                    col1, col2 = st.columns([0.8, 0.2])
+                    with col1:
+                        st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
+                        if "comment" in g:
+                            st.markdown(f"_Teacher Comment:_ {g['comment']}")
+                        created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                        target = datetime.date.fromisoformat(g["target_date"])
+                        total_days = (target - created).days or 1
+                        elapsed_days = (datetime.date.today() - created).days
+                        progress = min(max(elapsed_days / total_days, 0), 1.0)
+                        st.progress(progress)
+                        st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+                    with col2:
+                        if st.checkbox("Done", value=g["done"], key=g["id"]):
+                            today = datetime.date.today().isoformat()
+                            if not g["done"]:
+                                g["done"] = True
+                                g["completed_on"] = today
+                                last = streak.get("last_completion_date")
+                                if last == (datetime.date.today() - datetime.timedelta(days=1)).isoformat():
+                                    streak["streak"] += 1
+                                elif last != today:
+                                    streak["streak"] = 1
+                                streak["last_completion_date"] = today
+                                user_streaks[user] = streak
+                                save_json(GOALS_FILE, user_goals)
+                                save_json(STREAKS_FILE, user_streaks)
+                                check_and_award_badges(user, goals, streak)
 
-            done_goals = [g for g in goals if g["done"]]
-            if done_goals:
-                with st.expander("View Completed Goals"):
-                    for g in done_goals:
-                        st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
+                done_goals = [g for g in goals if g["done"]]
+                if done_goals:
+                    with st.expander("View Completed Goals"):
+                        for g in done_goals:
+                            st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
 
         with tabs[2]:
             st.subheader("Templates for You")
