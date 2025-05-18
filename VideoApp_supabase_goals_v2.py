@@ -360,7 +360,7 @@ elif st.session_state.logged_in:
                         "videos": [],
                         "created_on": str(datetime.date.today())
                     })
-                    user_goals[user] = goals
+                    supabase.table("goals").upsert(goals).execute()
                     # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
             for g in goals:
