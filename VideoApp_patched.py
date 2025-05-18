@@ -3,6 +3,8 @@ import uuid
 import datetime
 import json
 import os
+import streamlit as st
+st.write(st.secrets["supabase"]["url"])
 
 st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
 
