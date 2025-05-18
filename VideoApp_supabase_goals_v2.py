@@ -482,7 +482,7 @@ elif st.session_state.logged_in:
             st.subheader("Class Resources from Teacher")
 
             teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
-            teacher_videos = # load_json removed (Supabase used)(teacher_videos_file, [])
+            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
             my_groups = user_info.get("groups", [])
 
             if not teacher_videos:
