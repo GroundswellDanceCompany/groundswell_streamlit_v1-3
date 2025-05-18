@@ -13,11 +13,11 @@ SUPABASE_KEY = st.secrets["supabase"]["key"]
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- File Paths ---
-#USER_DB_FILE = "user_db.json"
-GOALS_FILE = "user_goals.json"
-TEMPLATES_FILE = "templates.json"
-STREAKS_FILE = "user_streaks.json"
-BADGES_FILE = "user_badges.json"
+#USER_DB_FILE = "user_db# JSON filename removed (Supabase used)"
+GOALS_FILE = "user_goals# JSON filename removed (Supabase used)"
+TEMPLATES_FILE = "templates# JSON filename removed (Supabase used)"
+STREAKS_FILE = "user_streaks# JSON filename removed (Supabase used)"
+BADGES_FILE = "user_badges# JSON filename removed (Supabase used)"
 VIDEO_DIR = "videos"
 CLASS_VIDEO_DIR = "teacher_videos"
 
@@ -26,33 +26,42 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-#def load_json(filename, default):
+#def # load_json removed (Supabase used)(filename, default):
     #if os.path.exists(filename):
         #with open(filename, "r") as f:
             #return json.load(f)
     #return default
 
-#def save_json(filename, data):
+#def # save_json removed (Supabase used)(filename, data):
     #with open(filename, "w") as f:
         #json.dump(data, f, indent=2)
 
 #if "USER_DB" not in st.session_state:
-    #st.session_state.USER_DB = load_json(USER_DB_FILE, {
+    #st.session_state.USER_DB = # load_json removed (Supabase used)(USER_DB_FILE, {
         #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
     #})
 
-#user_goals = load_json(GOALS_FILE, {})
-if "username" in st.session_state:
-    user_goals = supabase.table("goals") \
-        .select("*") \
-        .eq("username", st.session_state["username"]) \
-        .execute().data
-else:
-    user_goals = []
-    
-templates = load_json(TEMPLATES_FILE, [])
-user_streaks = load_json(STREAKS_FILE, {})
-user_badges = load_json(BADGES_FILE, {})
+#user_goals = # load_json removed (Supabase used)(GOALS_FILE, {})
+user_goals = (
+    supabase.table("goals")
+    .select("*")
+    .eq("user", st.session_state.username)
+    .execute()
+    .data
+)
+templates = supabase.table("templates") \
+    .select("*") \
+    .execute().data
+streak_rows = supabase.table("streaks") \
+    .select("*") \
+    .eq("username", st.session_state.username) \
+    .execute().data
+user_streaks = {st.session_state.username: streak_rows[0] if streak_rows else {"streak": 0, "last_completion_date": ""}}
+badge_rows = supabase.table("badges") \
+    .select("*") \
+    .eq("username", st.session_state.username) \
+    .execute().data
+user_badges = {st.session_state.username: badge_rows[0]["earned"] if badge_rows else []}
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
@@ -151,7 +160,6 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         st.rerun()
 
 # --- Main App ---
-# --- Main App ---
 elif st.session_state.logged_in:
     user = st.session_state.username
     user_info = st.session_state.USER_DB[user]
@@ -182,7 +190,7 @@ elif st.session_state.logged_in:
                         "category": cat,
                         "groups": assign
                     })
-                    save_json(TEMPLATES_FILE, templates)
+                    # save_json removed (Supabase used)(TEMPLATES_FILE, templates)
                     st.success("Template added.")
 
         with tabs[1]:
@@ -191,7 +199,7 @@ elif st.session_state.logged_in:
                 st.markdown(f"- **{t['text']}** ({t['category']}) â {', '.join(t['groups'])}")
                 if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
                     del templates[i]
-                    save_json(TEMPLATES_FILE, templates)
+                    # save_json removed (Supabase used)(TEMPLATES_FILE, templates)
                     st.success("Template deleted.")
                     st.session_state.template_deleted = True
 
@@ -219,15 +227,15 @@ elif st.session_state.logged_in:
                     new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
                     if new_comment != g.get("comment", ""):
                         g["comment"] = new_comment
-                        save_json(GOALS_FILE, user_goals)
+                        # save_json removed (Supabase used)(GOALS_FILE, user_goals)
             else:
                 st.info("No student goals available.")
 
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
 
-            teacher_videos_file = "teacher_videos.json"
-            teacher_videos = load_json(teacher_videos_file, [])
+            teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
+            teacher_videos = # load_json removed (Supabase used)(teacher_videos_file, [])
 
             # Upload section
             video_label = st.text_input("Video Label")
@@ -248,7 +256,7 @@ elif st.session_state.logged_in:
                         "uploaded": str(datetime.datetime.now())
                     }
                     teacher_videos.append(video_entry)
-                    save_json(teacher_videos_file, teacher_videos)
+                    # save_json removed (Supabase used)(teacher_videos_file, teacher_videos)
                     st.success("Video uploaded successfully.")
 
             # Viewing section
@@ -269,7 +277,7 @@ elif st.session_state.logged_in:
                             except:
                                 pass
                             teacher_videos.remove(v)
-                            save_json(teacher_videos_file, teacher_videos)
+                            # save_json removed (Supabase used)(teacher_videos_file, teacher_videos)
                             st.success(f"Deleted {v['label']}")
                             st.experimental_rerun()
                     else:
@@ -338,7 +346,7 @@ elif st.session_state.logged_in:
                         "created_on": str(datetime.date.today())
                     })
                     user_goals[user] = goals
-                    save_json(GOALS_FILE, user_goals)
+                    # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
             for g in goals:
                 if not g.get("done", False):  # Only show incomplete goals
@@ -367,8 +375,8 @@ elif st.session_state.logged_in:
                                     streak["streak"] = 1
                                 streak["last_completion_date"] = today
                                 user_streaks[user] = streak
-                                save_json(GOALS_FILE, user_goals)
-                                save_json(STREAKS_FILE, user_streaks)
+                                # save_json removed (Supabase used)(GOALS_FILE, user_goals)
+                                # save_json removed (Supabase used)(STREAKS_FILE, user_streaks)
                                 check_and_award_badges(user, goals, streak)
 
             done_goals = [g for g in goals if g["done"]]
@@ -397,7 +405,7 @@ elif st.session_state.logged_in:
                                 "created_on": str(datetime.date.today())
                             })
                             user_goals[user] = goals
-                            save_json(GOALS_FILE, user_goals)
+                            # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
         with tabs[3]:
             st.subheader("Upload Progress Videos")
@@ -417,7 +425,7 @@ elif st.session_state.logged_in:
                                 "uploaded": str(datetime.datetime.now())
                             })
                             st.success(f"Video '{video_label}' uploaded.")
-                            save_json(GOALS_FILE, user_goals)
+                            # save_json removed (Supabase used)(GOALS_FILE, user_goals)
                     if g.get("videos"):
                         for i, v in enumerate(g["videos"]):
                             video_file = v["filename"]
@@ -431,7 +439,7 @@ elif st.session_state.logged_in:
                                     except:
                                         pass
                                     del g["videos"][i]
-                                    save_json(GOALS_FILE, user_goals)
+                                    # save_json removed (Supabase used)(GOALS_FILE, user_goals)
                                     st.success(f"Deleted {label}")
                                     st.rerun()
                             else:
@@ -473,8 +481,8 @@ elif st.session_state.logged_in:
         with tabs[6]:
             st.subheader("Class Resources from Teacher")
 
-            teacher_videos_file = "teacher_videos.json"
-            teacher_videos = load_json(teacher_videos_file, [])
+            teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
+            teacher_videos = # load_json removed (Supabase used)(teacher_videos_file, [])
             my_groups = user_info.get("groups", [])
 
             if not teacher_videos:
@@ -513,7 +521,6 @@ elif st.session_state.logged_in:
 
             st.markdown("### Core Playlist")
             st.markdown("[Hip Hop Foundations](https://www.youtube.com/playlist?list=PLxyz123...)")
-
             
 
             
