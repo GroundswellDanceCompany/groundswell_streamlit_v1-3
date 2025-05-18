@@ -1,19 +1,18 @@
-from supabase import create_client, Client
+
 import streamlit as st
-
-# Connect using secrets
-SUPABASE_URL = st.secrets["supabase"]["url"]
-SUPABASE_KEY = st.secrets["supabase"]["key"]
-supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-
 import uuid
 import datetime
 import json
 import os
 import streamlit as st
-st.write(st.secrets["supabase"]["url"])
 
 st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
+
+from supabase import create_client, Client
+
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- File Paths ---
 #USER_DB_FILE = "user_db.json"
