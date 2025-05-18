@@ -1,15 +1,19 @@
+
 import streamlit as st
+st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
 import uuid
 import datetime
 import json
 import os
-import streamlit as st
-st.write(st.secrets["supabase"]["url"])
 
-st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
+from supabase import create_client, Client
+
+SUPABASE_URL = st.secrets["supabase"]["url"]
+SUPABASE_KEY = st.secrets["supabase"]["key"]
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- File Paths ---
-USER_DB_FILE = "user_db.json"
+#USER_DB_FILE = "user_db.json"
 GOALS_FILE = "user_goals.json"
 TEMPLATES_FILE = "templates.json"
 STREAKS_FILE = "user_streaks.json"
@@ -22,20 +26,20 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-def load_json(filename, default):
-    if os.path.exists(filename):
-        with open(filename, "r") as f:
-            return json.load(f)
-    return default
+#def load_json(filename, default):
+    #if os.path.exists(filename):
+        #with open(filename, "r") as f:
+            #return json.load(f)
+    #return default
 
-def save_json(filename, data):
-    with open(filename, "w") as f:
-        json.dump(data, f, indent=2)
+#def save_json(filename, data):
+    #with open(filename, "w") as f:
+        #json.dump(data, f, indent=2)
 
-if "USER_DB" not in st.session_state:
-    st.session_state.USER_DB = load_json(USER_DB_FILE, {
-        "teacher": {"password": "adminpass", "role": "admin", "groups": []}
-    })
+#if "USER_DB" not in st.session_state:
+    #st.session_state.USER_DB = load_json(USER_DB_FILE, {
+        #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
+    #})
 
 user_goals = load_json(GOALS_FILE, {})
 templates = load_json(TEMPLATES_FILE, [])
@@ -68,82 +72,75 @@ def logout():
     st.session_state.logged_in = False
     st.session_state.username = ""
     st.session_state.mode = "login"
-    
-def check_and_award_badges(username, goals, streak_data):
-    earned = user_badges.get(username, [])
-    done_goals = [g for g in goals if g["done"]]
-    categories = set(g["category"] for g in done_goals)
 
-    # First Goal Completed
-    if len(done_goals) >= 1 and "First Goal Completed" not in earned:
-        earned.append("First Goal Completed")
-        st.success("🏁 Badge Unlocked: First Goal Completed!")
-
-    # Five Goals
-    if len(done_goals) >= 5 and "Goal Getter: 5 Goals Done" not in earned:
-        earned.append("Goal Getter: 5 Goals Done")
-        st.success("⭐ Badge Unlocked: Goal Getter!")
-
-    # All Categories
-    required = {"Technique", "Strength", "Flexibility", "Performance"}
-    if required.issubset(categories) and "Well-Rounded: All Categories" not in earned:
-        earned.append("Well-Rounded: All Categories")
-        st.success("🌈 Badge Unlocked: Well-Rounded!")
-
-    # Streak Badge
-    if streak_data.get("streak", 0) >= 3 and "Streak Star: 3-Day Streak" not in earned:
-        earned.append("Streak Star: 3-Day Streak")
-        st.success("🔥 Badge Unlocked: Streak Star!")
-
-    user_badges[username] = earned
-    save_json(BADGES_FILE, user_badges)
 # --- Login System ---
 if not st.session_state.logged_in and st.session_state.mode == "login":
-    st.title("Groundswell Goal Tracker")
+    st.title("Groundswell Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
+    
     if st.button("Login"):
-        db = st.session_state.USER_DB
-        if username in db and db[username]["password"] == password:
+        result = supabase.table("users").select("*").eq("username", username).execute()
+        users = result.data
+        if users and users[0]["password"] == password:
             st.session_state.logged_in = True
             st.session_state.username = username
+            st.session_state.user_role = users[0]["role"]
+            st.session_state.user_groups = users[0].get("groups", [])
         else:
             st.error("Invalid login.")
-    if st.button("Sign Up"): st.session_state.mode = "signup"; st.rerun()
-    if st.button("Reset Password"): st.session_state.mode = "reset"; st.rerun()
+
+    if st.button("Sign Up"):
+        st.session_state.mode = "signup"
+        st.rerun()
+
+    if st.button("Reset Password"):
+        st.session_state.mode = "reset"
+        st.rerun()
 
 elif not st.session_state.logged_in and st.session_state.mode == "signup":
-    st.title("Create Account")
+    st.title("Create Student Account")
     new_user = st.text_input("New Username")
     new_pass = st.text_input("New Password", type="password")
-    groups = st.multiselect("Your Classes", CLASS_GROUPS)
+    groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
+
     if st.button("Create"):
-        db = st.session_state.USER_DB
-        if new_user in db:
-            st.error("Username taken.")
+        existing = supabase.table("users").select("username").eq("username", new_user).execute().data
+        if existing:
+            st.error("Username already exists.")
         else:
-            db[new_user] = {"password": new_pass, "role": "student", "groups": groups}
-            save_json(USER_DB_FILE, db)
-            st.success("Account created!")
+            supabase.table("users").insert({
+                "username": new_user,
+                "password": new_pass,
+                "role": "student",
+                "groups": groups
+            }).execute()
+            st.success("Account created! Please log in.")
             st.session_state.mode = "login"
             st.rerun()
-    if st.button("Back"): st.session_state.mode = "login"; st.rerun()
+
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
 
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
     st.title("Reset Password")
     user = st.text_input("Username")
     new_pass = st.text_input("New Password", type="password")
+
     if st.button("Reset"):
-        db = st.session_state.USER_DB
-        if user in db and user != "teacher":
-            db[user]["password"] = new_pass
-            save_json(USER_DB_FILE, db)
+        result = supabase.table("users").select("*").eq("username", user).execute().data
+        if result:
+            supabase.table("users").update({"password": new_pass}).eq("username", user).execute()
             st.success("Password reset.")
             st.session_state.mode = "login"
             st.rerun()
         else:
             st.error("User not found.")
-    if st.button("Back"): st.session_state.mode = "login"; st.rerun()
+
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
 
 # --- Main App ---
 elif st.session_state.logged_in:
