@@ -235,7 +235,7 @@ elif st.session_state.logged_in:
             st.subheader("Upload Class Resource Videos")
 
             teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
-            teacher_videos = # load_json removed (Supabase used)(teacher_videos_file, [])
+            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
 
             # Upload section
             video_label = st.text_input("Video Label")
