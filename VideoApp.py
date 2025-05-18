@@ -1,12 +1,10 @@
 
 import streamlit as st
+st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
 import uuid
 import datetime
 import json
 import os
-import streamlit as st
-
-st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
 
 from supabase import create_client, Client
 
