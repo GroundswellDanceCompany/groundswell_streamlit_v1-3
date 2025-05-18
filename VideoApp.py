@@ -16,7 +16,7 @@ st.write(st.secrets["supabase"]["url"])
 st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
 
 # --- File Paths ---
-USER_DB_FILE = "user_db.json"
+#USER_DB_FILE = "user_db.json"
 GOALS_FILE = "user_goals.json"
 TEMPLATES_FILE = "templates.json"
 STREAKS_FILE = "user_streaks.json"
@@ -29,20 +29,20 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-def load_json(filename, default):
-    if os.path.exists(filename):
-        with open(filename, "r") as f:
-            return json.load(f)
-    return default
+#def load_json(filename, default):
+    #if os.path.exists(filename):
+        #with open(filename, "r") as f:
+            #return json.load(f)
+    #return default
 
-def save_json(filename, data):
-    with open(filename, "w") as f:
-        json.dump(data, f, indent=2)
+#def save_json(filename, data):
+    #with open(filename, "w") as f:
+        #json.dump(data, f, indent=2)
 
-if "USER_DB" not in st.session_state:
-    st.session_state.USER_DB = load_json(USER_DB_FILE, {
-        "teacher": {"password": "adminpass", "role": "admin", "groups": []}
-    })
+#if "USER_DB" not in st.session_state:
+    #st.session_state.USER_DB = load_json(USER_DB_FILE, {
+        #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
+    #})
 
 user_goals = load_json(GOALS_FILE, {})
 templates = load_json(TEMPLATES_FILE, [])
