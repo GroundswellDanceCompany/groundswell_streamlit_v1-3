@@ -41,7 +41,7 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
         #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
     #})
 
-user_goals = load_json(GOALS_FILE, {})
+#user_goals = load_json(GOALS_FILE, {})
 templates = load_json(TEMPLATES_FILE, [])
 user_streaks = load_json(STREAKS_FILE, {})
 user_badges = load_json(BADGES_FILE, {})
