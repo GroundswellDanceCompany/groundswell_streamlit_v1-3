@@ -151,6 +151,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         st.rerun()
 
 # --- Main App ---
+# --- Main App ---
 elif st.session_state.logged_in:
     user = st.session_state.username
     user_info = st.session_state.USER_DB[user]
