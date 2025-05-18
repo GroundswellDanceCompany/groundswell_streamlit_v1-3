@@ -314,7 +314,7 @@ elif st.session_state.logged_in:
             "Youtube"
         ])
 
-        goals = user_goals.get(user, [])
+        goals = user_goals  # already a list of goals for this user
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
         badges = user_badges.get(user, [])
 
