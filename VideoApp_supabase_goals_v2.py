@@ -148,6 +148,15 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         st.session_state.mode = "login"
         st.rerun()
 
+    if st.session_state.get("logged_in") and st.session_state.get("username"):
+    user_goals = supabase.table("goals") \
+        .select("*") \
+        .eq("username", st.session_state.username) \
+        .execute() \
+        .data
+else:
+    user_goals = []
+
 # --- Main App ---
 elif st.session_state.logged_in:
     user = st.session_state.username
