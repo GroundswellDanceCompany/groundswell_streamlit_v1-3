@@ -62,18 +62,18 @@ templates = supabase.table("templates") \
     .execute().data
 if st.session_state.logged_in:
     # Safe to use st.session_state.username here
-streak_rows = supabase.table("streaks") \
-    .select("*") \
-    .eq("username", st.session_state.username) \
-    .execute().data
-user_streaks = {st.session_state.username: streak_rows[0] if streak_rows else {"streak": 0, "last_completion_date": ""}}
+    streak_rows = supabase.table("streaks") \
+        .select("*") \
+        .eq("username", st.session_state.username) \
+        .execute().data
+    user_streaks = {st.session_state.username: streak_rows[0] if streak_rows else {"streak": 0, "last_completion_date": ""}}
 if st.session_state.logged_in:
     # Safe to use st.session_state.username here
-badge_rows = supabase.table("badges") \
-    .select("*") \
-    .eq("username", st.session_state.username) \
-    .execute().data
-user_badges = {st.session_state.username: badge_rows[0]["earned"] if badge_rows else []}
+    badge_rows = supabase.table("badges") \
+        .select("*") \
+        .eq("username", st.session_state.username) \
+        .execute().data
+    user_badges = {st.session_state.username: badge_rows[0]["earned"] if badge_rows else []}
 
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
