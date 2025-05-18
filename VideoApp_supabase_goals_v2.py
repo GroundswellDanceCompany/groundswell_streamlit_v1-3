@@ -174,7 +174,10 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 # --- Main App ---
 elif st.session_state.logged_in:
     user = st.session_state.username
-    user_info = st.session_state.USER_DB[user]
+    user_info = {
+    "role": st.session_state.user_role,
+    "groups": st.session_state.user_groups
+}
     is_teacher = user_info["role"] == "admin"
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
