@@ -44,7 +44,7 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
 user_goals = (
     supabase.table("goals")
     .select("*")
-    .eq("user", st.session_state.username)
+    .eq("username", st.session_state.username)
     .execute()
     .data
 )
