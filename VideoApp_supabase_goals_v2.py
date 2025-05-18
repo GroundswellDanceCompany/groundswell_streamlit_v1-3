@@ -41,10 +41,14 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
         #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
     #})
 
-user_goals = supabase.table("goals") \
-    .select("*") \
-    .eq("username", st.session_state.username) \
-    .execute().data
+if st.session_state.get("logged_in") and st.session_state.get("username"):
+    user_goals = supabase.table("goals") \
+        .select("*") \
+        .eq("username", st.session_state.username) \
+        .execute() \
+        .data
+else:
+    user_goals = []
 user_goals = (
     supabase.table("goals")
     .select("*")
