@@ -49,10 +49,11 @@ if st.session_state.get("logged_in") and st.session_state.get("username"):
         .data
 else:
     user_goals = []
+    
 user_goals = (
     supabase.table("goals")
     .select("*")
-    .eq("user", st.session_state.username)
+    .eq("username", st.session_state.username)
     .execute()
     .data
 )
@@ -87,7 +88,7 @@ def logout():
     st.session_state.username = ""
     st.session_state.mode = "login"
 
-# --- Login System ---
+# --- Login System ---UI
 if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Login")
     username = st.text_input("Username")
