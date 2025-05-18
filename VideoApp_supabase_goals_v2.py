@@ -1,4 +1,3 @@
-
 import streamlit as st
 st.set_page_config(page_title="Groundswell Goal Tracker", layout="centered")
 import uuid
@@ -41,19 +40,11 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
         #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
     #})
 
-if st.session_state.get("logged_in") and st.session_state.get("username"):
-    user_goals = supabase.table("goals") \
-        .select("*") \
-        .eq("username", st.session_state.username) \
-        .execute() \
-        .data
-else:
-    user_goals = []
-    
+#user_goals = load_json(GOALS_FILE, {})
 user_goals = (
     supabase.table("goals")
     .select("*")
-    .eq("username", st.session_state.username)
+    .eq("user", st.session_state.username)
     .execute()
     .data
 )
@@ -77,10 +68,10 @@ CLASS_GROUPS = [
 ]
 
 BADGE_EMOJIS = {
-    "First Goal Completed": "🏁",
-    "Goal Getter: 5 Goals Done": "⭐",
-    "Well-Rounded: All Categories": "🌈",
-    "Streak Star: 3-Day Streak": "🔥"
+    "First Goal Completed": "ð",
+    "Goal Getter: 5 Goals Done": "â­",
+    "Well-Rounded: All Categories": "ð",
+    "Streak Star: 3-Day Streak": "ð¥"
 }
 
 def logout():
@@ -88,7 +79,7 @@ def logout():
     st.session_state.username = ""
     st.session_state.mode = "login"
 
-# --- Login System ---UI
+# --- Login System ---
 if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Login")
     username = st.text_input("Username")
@@ -194,7 +185,7 @@ elif st.session_state.logged_in:
         with tabs[1]:
             st.subheader("All Templates")
             for i, t in enumerate(templates):
-                st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(t['groups'])}")
+                st.markdown(f"- **{t['text']}** ({t['category']}) â {', '.join(t['groups'])}")
                 if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
                     del templates[i]
                     save_json(TEMPLATES_FILE, templates)
@@ -213,18 +204,19 @@ elif st.session_state.logged_in:
 
                 st.markdown(f"### {selected_student}")
                 for g in student_goals:
-                    st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
+                    st.markdown(f"**{g['text']}** ({g['category']}) â due {g['target_date']}")
                     created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
                     target = datetime.date.fromisoformat(g["target_date"])
                     total_days = (target - created).days or 1
                     elapsed_days = (datetime.date.today() - created).days
                     progress = min(max(elapsed_days / total_days, 0), 1.0)
                     st.progress(progress)
-                    st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+                    st.caption(f"{int(progress * 100)}% complete â due {g['target_date']}")
                     comment_key = f"comment_{selected_student}_{g['id']}"
                     new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
                     if new_comment != g.get("comment", ""):
                         g["comment"] = new_comment
+                        save_json(GOALS_FILE, user_goals)
             else:
                 st.info("No student goals available.")
 
@@ -265,7 +257,7 @@ elif st.session_state.logged_in:
                 st.info("No videos uploaded for this class.")
             else:
                 for i, v in enumerate(filtered_videos):
-                    st.markdown(f"**{v['label']}** — uploaded {v['uploaded']}")
+                    st.markdown(f"**{v['label']}** â uploaded {v['uploaded']}")
                     if os.path.exists(v["filename"]):
                         st.video(v["filename"])
                         if st.button(f"Delete {v['label']}", key=f"del_teacher_video_{i}"):
@@ -304,7 +296,7 @@ elif st.session_state.logged_in:
             st.subheader("About the Groundswell Goal Tracker")
 
             st.markdown("""
-            Welcome to the **Groundswell Goal Tracker** — your personal space to set, track, and celebrate your dance training progress.
+            Welcome to the **Groundswell Goal Tracker** â your personal space to set, track, and celebrate your dance training progress.
 
             **What you can do here:**
             - Set goals in areas like Technique, Strength, Flexibility, and Performance
@@ -319,11 +311,11 @@ elif st.session_state.logged_in:
             - Building a 3-day streak of goal completion
 
             **Tips:**
-            - Use the “Today's Goals” tab to stay focused on deadlines
-            - Check “Class Resources” for helpful videos from your teachers
-            - Be consistent — small steps lead to big progress!
+            - Use the âToday's Goalsâ tab to stay focused on deadlines
+            - Check âClass Resourcesâ for helpful videos from your teachers
+            - Be consistent â small steps lead to big progress!
 
-            _This platform is built for the Groundswell Dance community — let’s grow together._
+            _This platform is built for the Groundswell Dance community â letâs grow together._
             """)
 
         with tabs[1]:
@@ -343,12 +335,13 @@ elif st.session_state.logged_in:
                         "created_on": str(datetime.date.today())
                     })
                     user_goals[user] = goals
+                    save_json(GOALS_FILE, user_goals)
 
             for g in goals:
                 if not g.get("done", False):  # Only show incomplete goals
                     col1, col2 = st.columns([0.8, 0.2])
                     with col1:
-                        st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
+                        st.markdown(f"**{g['text']}** â {g['category']} (due {g['target_date']})")
                         if "comment" in g:
                             st.markdown(f"_Teacher Comment:_ {g['comment']}")
                         created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
@@ -357,7 +350,7 @@ elif st.session_state.logged_in:
                         elapsed_days = (datetime.date.today() - created).days
                         progress = min(max(elapsed_days / total_days, 0), 1.0)
                         st.progress(progress)
-                        st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+                        st.caption(f"{int(progress * 100)}% complete â due {g['target_date']}")
                     with col2:
                         if st.checkbox("Done", value=g["done"], key=g["id"]):
                             today = datetime.date.today().isoformat()
@@ -371,6 +364,7 @@ elif st.session_state.logged_in:
                                     streak["streak"] = 1
                                 streak["last_completion_date"] = today
                                 user_streaks[user] = streak
+                                save_json(GOALS_FILE, user_goals)
                                 save_json(STREAKS_FILE, user_streaks)
                                 check_and_award_badges(user, goals, streak)
 
@@ -378,7 +372,7 @@ elif st.session_state.logged_in:
             if done_goals:
                 with st.expander("View Completed Goals"):
                     for g in done_goals:
-                        st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
+                        st.markdown(f"- **{g['text']}** ({g['category']}) â Completed on {g.get('completed_on', 'N/A')}")
 
         with tabs[2]:
             st.subheader("Templates for You")
@@ -400,6 +394,7 @@ elif st.session_state.logged_in:
                                 "created_on": str(datetime.date.today())
                             })
                             user_goals[user] = goals
+                            save_json(GOALS_FILE, user_goals)
 
         with tabs[3]:
             st.subheader("Upload Progress Videos")
@@ -419,12 +414,13 @@ elif st.session_state.logged_in:
                                 "uploaded": str(datetime.datetime.now())
                             })
                             st.success(f"Video '{video_label}' uploaded.")
+                            save_json(GOALS_FILE, user_goals)
                     if g.get("videos"):
                         for i, v in enumerate(g["videos"]):
                             video_file = v["filename"]
                             label = v.get("label", f"Video {i+1}")
                             if os.path.exists(video_file):
-                                st.markdown(f"**{label}** — Uploaded: {v['uploaded']}")
+                                st.markdown(f"**{label}** â Uploaded: {v['uploaded']}")
                                 st.video(video_file)
                                 if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
                                     try:
@@ -432,6 +428,7 @@ elif st.session_state.logged_in:
                                     except:
                                         pass
                                     del g["videos"][i]
+                                    save_json(GOALS_FILE, user_goals)
                                     st.success(f"Deleted {label}")
                                     st.rerun()
                             else:
@@ -442,10 +439,10 @@ elif st.session_state.logged_in:
             today = datetime.date.today().isoformat()
             todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
             if not todays_goals:
-                st.info("No goals due today — you're all caught up!")
+                st.info("No goals due today â you're all caught up!")
             else:
                 for g in todays_goals:
-                    st.markdown(f"- **{g['text']}** — {g['category']}")
+                    st.markdown(f"- **{g['text']}** â {g['category']}")
 
         with tabs[5]:
             st.subheader("My Progress Overview")
@@ -458,7 +455,7 @@ elif st.session_state.logged_in:
             if completed_goals:
                 st.markdown("### Goals Completed This Week")
                 for g in completed_goals:
-                    st.markdown(f"- **{g['text']}** ({g['category']}) — completed on {g['completed_on']}")
+                    st.markdown(f"- **{g['text']}** ({g['category']}) â completed on {g['completed_on']}")
             else:
                 st.info("No goals completed this week.")
             st.markdown("### Streak Status")
@@ -468,7 +465,7 @@ elif st.session_state.logged_in:
                 for b in badges:
                     st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
             else:
-                st.caption("No badges yet — keep going!")
+                st.caption("No badges yet â keep going!")
                 
         with tabs[6]:
             st.subheader("Class Resources from Teacher")
@@ -491,7 +488,7 @@ elif st.session_state.logged_in:
                     st.warning("No videos match your filters.")
                 else:
                     for v in results:
-                        with st.expander(f"{v['class']} – {v['label']}"):
+                        with st.expander(f"{v['class']} â {v['label']}"):
                             st.caption(f"Uploaded: {v['uploaded']}")
                             if os.path.exists(v["filename"]):
                                 st.video(v["filename"])
@@ -513,6 +510,8 @@ elif st.session_state.logged_in:
 
             st.markdown("### Core Playlist")
             st.markdown("[Hip Hop Foundations](https://www.youtube.com/playlist?list=PLxyz123...)")
+
+            
 
             
 
