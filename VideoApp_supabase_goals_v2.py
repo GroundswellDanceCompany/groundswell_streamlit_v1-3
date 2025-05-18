@@ -42,13 +42,14 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
     #})
 
 #user_goals = load_json(GOALS_FILE, {})
-user_goals = (
-    supabase.table("goals")
-    .select("*")
-    .eq("user", st.session_state.username)
-    .execute()
-    .data
-)
+if "username" in st.session_state:
+    user_goals = supabase.table("goals") \
+        .select("*") \
+        .eq("username", st.session_state["username"]) \
+        .execute().data
+else:
+    user_goals = []
+    
 templates = load_json(TEMPLATES_FILE, [])
 user_streaks = load_json(STREAKS_FILE, {})
 user_badges = load_json(BADGES_FILE, {})
