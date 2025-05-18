@@ -350,24 +350,31 @@ elif st.session_state.logged_in:
                 g_text = st.text_input("New Goal")
                 g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
                 g_date = st.date_input("Target Date", datetime.date.today())
+
                 if st.form_submit_button("Add") and g_text:
-                    goals.append({
+                    new_goal = {
                         "id": str(uuid.uuid4()),
+                        "user": st.session_state.username,
                         "text": g_text,
                         "category": g_cat,
                         "target_date": str(g_date),
                         "done": False,
                         "videos": [],
                         "created_on": str(datetime.date.today())
-                    })
-                    supabase.table("goals").upsert(goals).execute()
-                    # save_json removed (Supabase used)(GOALS_FILE, user_goals)
+                    }
+
+                    # Insert into Supabase
+                    supabase.table("goals").insert(new_goal).execute()
+
+                    # Refresh goals
+                    goals = supabase.table("goals").select("*") \
+                        .eq("user", st.session_state.username).execute().data
 
             for g in goals:
-                if not g.get("done", False):  # Only show incomplete goals
+                if not g.get("done", False):
                     col1, col2 = st.columns([0.8, 0.2])
                     with col1:
-                        st.markdown(f"**{g['text']}** â {g['category']} (due {g['target_date']})")
+                        st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
                         if "comment" in g:
                             st.markdown(f"_Teacher Comment:_ {g['comment']}")
                         created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
@@ -376,7 +383,7 @@ elif st.session_state.logged_in:
                         elapsed_days = (datetime.date.today() - created).days
                         progress = min(max(elapsed_days / total_days, 0), 1.0)
                         st.progress(progress)
-                        st.caption(f"{int(progress * 100)}% complete â due {g['target_date']}")
+                        st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
                     with col2:
                         if st.checkbox("Done", value=g["done"], key=g["id"]):
                             today = datetime.date.today().isoformat()
