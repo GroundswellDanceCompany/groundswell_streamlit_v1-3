@@ -282,6 +282,9 @@ elif st.session_state.logged_in:
 
             teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
             teacher_videos = supabase.table("teacher_videos").select("*").execute().data
+            filtered = [
+                v for v in teacher_videos if v["class"] in my_groups
+            ]
 
             # Upload section
             video_label = st.text_input("Video Label")
