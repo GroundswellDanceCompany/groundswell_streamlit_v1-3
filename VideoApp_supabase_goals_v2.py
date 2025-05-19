@@ -114,7 +114,7 @@ if "mode" not in st.session_state:
     st.session_state.mode = "login"
 
 CLASS_GROUPS = [
-    "GSD Youth", "Jenga", "GFoundation", "Junior Contemporary", "Intermediate Contemporary",
+    "GSD Youth", "Jenga", 'GFoundation', "Junior Contemporary", "Intermediate Contemporary",
     "Junior Jazz", "Advanced Jazz", "Junior House", "Junior Hip Hop", "Advanced House",
     "Advanced Hip Hop", "Junior Waacking", "Junior Locking", "Advanced Waacking",
     "Advanced Locking", "Junior Ballet", "Intermediate Ballet", "Youth Contemporary Company",
