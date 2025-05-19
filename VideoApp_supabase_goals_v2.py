@@ -304,7 +304,8 @@ elif st.session_state.logged_in:
                         "filename": filepath,
                         "uploaded": str(datetime.datetime.now())
                     }
-                    teacher_videos.append(video_entry)
+
+                    supabase.table("teacher_videos").insert(video_entry).execute()
                     # save_json removed (Supabase used)(teacher_videos_file, teacher_videos)
                     st.success("Video uploaded successfully.")
 
