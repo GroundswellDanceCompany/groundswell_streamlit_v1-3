@@ -383,7 +383,9 @@ elif st.session_state.logged_in:
                         st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
                         if "comment" in g:
                             st.markdown(f"_Teacher Comment:_ {g['comment']}")
-                        created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                        created = datetime.datetime.fromisoformat(
+                            g.get("created_on", g["target_date"])
+                        ).date()
                         target = datetime.date.fromisoformat(g["target_date"])
                         total_days = (target - created).days or 1
                         elapsed_days = (datetime.date.today() - created).days
