@@ -5,17 +5,6 @@ import uuid
 import datetime
 import json
 import os
-import ast
-
-my_groups = st.session_state.user_groups
-
-def parse_groups(t):
-    try:
-        return ast.literal_eval(t.get("groups", "[]"))  # safely parse list
-    except:
-        return []
-
-my_templates = [t for t in templates if any(g in my_groups for g in parse_groups(t))]
 
 if "username" not in st.session_state:
     st.session_state.username = ""
@@ -464,12 +453,24 @@ elif st.session_state.logged_in:
 
         with tabs[2]:
             st.subheader("Templates for You")
+
+            import ast
+
+            my_groups = st.session_state.user_groups
+
+            def parse_groups(t):
+                try:
+                    return ast.literal_eval(t.get("groups", "[]"))  # safely parse list
+                except:
+                    return []
+
+            my_templates = [t for t in templates if any(g in my_groups for g in parse_groups(t))]
+            
             my_groups = st.session_state.user_groups
             my_templates = [
                 t for t in templates if any(g in my_groups for g in t.get("groups", []))
             ]
-            my_groups = user_info.get("groups", [])
-            my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
+            
             for t in my_templates:
                 with st.expander(f"{t['text']} ({t['category']})"):
                     with st.form(f"form_{t['id']}"):
