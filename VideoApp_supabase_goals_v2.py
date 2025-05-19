@@ -235,7 +235,7 @@ elif st.session_state.logged_in:
                             "id": str(uuid.uuid4()),
                             "text": text,
                             "category": cat,
-                            "groups": json.dumps(assign)  # Save as string
+                            "groups": assign  # now works because the column exists and is text[]
                         }).execute()
                         st.success("Template added.")
                         st.rerun()
