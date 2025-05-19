@@ -352,22 +352,22 @@ elif st.session_state.logged_in:
                 g_date = st.date_input("Target Date", datetime.date.today())
 
                 if st.form_submit_button("Add") and g_text:
-                try:
-                    new_goal = {
-                        "id": str(uuid.uuid4()),
-                        "username": st.session_state.username,  # <- important!
-                        "text": g_text,
-                        "category": g_cat,
-                        "target_date": str(g_date),
-                        "done": False,
-                        "created_on": str(datetime.date.today()),
-                        "videos": []
-                    }
-                    supabase.table("goals").insert(new_goal).execute()
+                    try:
+                        new_goal = {
+                            "id": str(uuid.uuid4()),
+                            "username": st.session_state.username,  # <- important!
+                            "text": g_text,
+                            "category": g_cat,
+                            "target_date": str(g_date),
+                            "done": False,
+                            "created_on": str(datetime.date.today()),
+                            "videos": []
+                        }
+                        supabase.table("goals").insert(new_goal).execute()
                     
-                except Exception as e:
-                    st.error(f"Insert failed: {e}")
-                    st.stop()
+                    except Exception as e:
+                        st.error(f"Insert failed: {e}")
+                        st.stop()
 
                     # Insert into Supabase
                     
