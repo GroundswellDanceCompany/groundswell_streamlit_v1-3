@@ -5,6 +5,17 @@ import uuid
 import datetime
 import json
 import os
+import ast
+
+my_groups = st.session_state.user_groups
+
+def parse_groups(t):
+    try:
+        return ast.literal_eval(t.get("groups", "[]"))  # safely parse list
+    except:
+        return []
+
+my_templates = [t for t in templates if any(g in my_groups for g in parse_groups(t))]
 
 if "username" not in st.session_state:
     st.session_state.username = ""
