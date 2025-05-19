@@ -386,7 +386,7 @@ elif st.session_state.logged_in:
                         created = datetime.datetime.fromisoformat(
                             g.get("created_on", g["target_date"])
                         ).date()
-                        target = datetime.date.fromisoformat(g["target_date"])
+                        target = datetime.datetime.fromisoformat(g["target_date"]).date()
                         total_days = (target - created).days or 1
                         elapsed_days = (datetime.date.today() - created).days
                         progress = min(max(elapsed_days / total_days, 0), 1.0)
