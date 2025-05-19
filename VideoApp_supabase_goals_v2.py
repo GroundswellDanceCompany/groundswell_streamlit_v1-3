@@ -230,14 +230,17 @@ elif st.session_state.logged_in:
                 cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
                 assign = st.multiselect("Assign to Groups", CLASS_GROUPS)
                 if st.form_submit_button("Add") and text:
-                    templates.append({
-                        "id": str(uuid.uuid4()),
-                        "text": text,
-                        "category": cat,
-                        "groups": assign
-                    })
-                    # save_json removed (Supabase used)(TEMPLATES_FILE, templates)
-                    st.success("Template added.")
+                    try:
+                        supabase.table("templates").insert({
+                            "id": str(uuid.uuid4()),
+                            "text": text,
+                            "category": cat,
+                            "groups": json.dumps(assign)  # Save as string
+                        }).execute()
+                        st.success("Template added.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Template save failed: {e}")
 
         with tabs[1]:
             st.subheader("All Templates")
