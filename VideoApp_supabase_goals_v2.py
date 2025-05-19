@@ -354,13 +354,13 @@ elif st.session_state.logged_in:
                 if st.form_submit_button("Add") and g_text:
                     new_goal = {
                         "id": str(uuid.uuid4()),
-                        "user": st.session_state.username,
+                        "username": st.session_state.username,  # <- important!
                         "text": g_text,
                         "category": g_cat,
                         "target_date": str(g_date),
                         "done": False,
-                        "videos": [],
-                        "created_on": str(datetime.date.today())
+                        "created_on": str(datetime.date.today()),
+                        "videos": []
                     }
 
                     # Insert into Supabase
