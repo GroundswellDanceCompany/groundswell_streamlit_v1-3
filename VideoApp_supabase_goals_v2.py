@@ -352,6 +352,7 @@ elif st.session_state.logged_in:
                 g_date = st.date_input("Target Date", datetime.date.today())
 
                 if st.form_submit_button("Add") and g_text:
+                try:
                     new_goal = {
                         "id": str(uuid.uuid4()),
                         "username": st.session_state.username,  # <- important!
@@ -362,14 +363,14 @@ elif st.session_state.logged_in:
                         "created_on": str(datetime.date.today()),
                         "videos": []
                     }
-                    try:
-                        supabase.table("goals").insert(new_goal).execute()
-                    except Exception as e:
-                            st.error(f"Insert failed: {e}")
-                        st.stop()
+                    supabase.table("goals").insert(new_goal).execute()
+                    
+                except Exception as e:
+                    st.error(f"Insert failed: {e}")
+                    st.stop()
 
                     # Insert into Supabase
-                    supabase.table("goals").insert(new_goal).execute()
+                    
 
                     # Refresh goals
                     goals = supabase.table("goals").select("*") \
