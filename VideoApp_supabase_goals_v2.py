@@ -448,6 +448,10 @@ elif st.session_state.logged_in:
 
         with tabs[2]:
             st.subheader("Templates for You")
+            my_groups = st.session_state.user_groups
+            my_templates = [
+                t for t in templates if any(g in my_groups for g in t.get("groups", []))
+            ]
             my_groups = user_info.get("groups", [])
             my_templates = [t for t in templates if any(g in my_groups for g in t.get("groups", []))]
             for t in my_templates:
