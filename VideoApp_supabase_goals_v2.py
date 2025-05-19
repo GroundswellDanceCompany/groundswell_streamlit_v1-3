@@ -75,6 +75,37 @@ if st.session_state.logged_in:
         .execute().data
     user_badges = {st.session_state.username: badge_rows[0]["earned"] if badge_rows else []}
 
+def check_and_award_badges(username, goals, streak_data):
+    earned = user_badges.get(username, [])
+    done_goals = [g for g in goals if g.get("done")]
+    categories = set(g["category"] for g in done_goals)
+
+    if len(done_goals) >= 1 and "First Goal Completed" not in earned:
+        earned.append("First Goal Completed")
+        st.success("🏁 Badge Unlocked: First Goal Completed!")
+
+    if len(done_goals) >= 5 and "Goal Getter: 5 Goals Done" not in earned:
+        earned.append("Goal Getter: 5 Goals Done")
+        st.success("⭐ Badge Unlocked: Goal Getter!")
+
+    if all(cat in categories for cat in ["Technique", "Strength", "Flexibility", "Performance"]) \
+            and "Well-Rounded: All Categories" not in earned:
+        earned.append("Well-Rounded: All Categories")
+        st.success("🌈 Badge Unlocked: Well-Rounded!")
+
+    if streak_data.get("streak", 0) >= 3 and "Streak Star: 3-Day Streak" not in earned:
+        earned.append("Streak Star: 3-Day Streak")
+        st.success("🔥 Badge Unlocked: Streak Star!")
+
+    # Update in memory
+    user_badges[username] = earned
+
+    # Save to Supabase
+    supabase.table("badges").upsert({
+        "username": username,
+        "earned": earned
+    }).execute()
+
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 if "username" not in st.session_state:
