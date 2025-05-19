@@ -362,13 +362,18 @@ elif st.session_state.logged_in:
                         "created_on": str(datetime.date.today()),
                         "videos": []
                     }
+                    try:
+                        supabase.table("goals").insert(new_goal).execute()
+                    except Exception as e:
+                            st.error(f"Insert failed: {e}")
+                        st.stop()
 
                     # Insert into Supabase
                     supabase.table("goals").insert(new_goal).execute()
 
                     # Refresh goals
                     goals = supabase.table("goals").select("*") \
-                        .eq("user", st.session_state.username).execute().data
+                        .eq("username", st.session_state.username).execute().data
 
             for g in goals:
                 if not g.get("done", False):
