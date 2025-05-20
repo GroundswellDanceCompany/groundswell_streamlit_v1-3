@@ -44,7 +44,7 @@ def parse_groups(template):
 
 if "username" in st.session_state:
     # Load goals
-all_goals = supabase.table("goals").select("*").execute().data
+    all_goals = supabase.table("goals").select("*").execute().data
 
 else:
     user_goals = []
