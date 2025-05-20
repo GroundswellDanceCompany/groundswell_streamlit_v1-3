@@ -296,7 +296,7 @@ elif st.session_state.logged_in:
                     storage_path = f"{video_class}/{unique_filename}"
 
                     try:
-                        supabase.storage.from_("teacher_videos").upload(
+                        supabase.storage.from_("teachervideos").upload(
                             path=storage_path,
                             file=uploaded_file.getvalue(),
                             file_options={"content-type": uploaded_file.type}
@@ -308,7 +308,7 @@ elif st.session_state.logged_in:
                             "filename": storage_path,
                             "uploaded": str(datetime.datetime.now())
                         }
-                        supabase.table("teacher_videos").insert(video_record).execute()
+                        supabase.table("teachervideos").insert(video_record).execute()
 
                         st.success("Video uploaded successfully.")
                     except Exception as e:
@@ -317,7 +317,7 @@ elif st.session_state.logged_in:
             # Viewing section
             st.markdown("### Class Video Library")
             selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
-            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
+            teacher_videos = supabase.table("teachervideos").select("*").execute().data
             filtered_videos = [v for v in teacher_videos if v["class"] == selected_class]
 
             if not filtered_videos:
@@ -332,10 +332,10 @@ elif st.session_state.logged_in:
                                 os.remove(v["filename"])
                             except:
                                 pass
-                            teacher_videos.remove(v)
+                            teachervideos.remove(v)
                             # save_json removed (Supabase used)(teacher_videos_file, teacher_videos)
                             st.success(f"Deleted {v['label']}")
-                            st.experimental_rerun()
+                            st.rerun()
                     else:
                         st.warning("File not found.")
 
@@ -504,7 +504,7 @@ elif st.session_state.logged_in:
                             video_path = f"{st.session_state.username}/{video_filename}"
 
                             try:
-                                supabase.storage.from_("student_videos").upload(
+                                supabase.storage.from_("studentvideos").upload(
                                     path=video_path,
                                     file=uploaded.getvalue(),
                                     file_options={"content-type": uploaded.type}
