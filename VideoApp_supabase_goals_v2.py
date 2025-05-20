@@ -114,7 +114,7 @@ if "mode" not in st.session_state:
     st.session_state.mode = "login"
 
 CLASS_GROUPS = [
-    "GSD Youth", "Jenga", 'GFoundation', "Junior Contemporary", "Intermediate Contemporary",
+    "GSD Youth", "Jenga", "GFoundation", "Junior Contemporary", "Intermediate Contemporary",
     "Junior Jazz", "Advanced Jazz", "Junior House", "Junior Hip Hop", "Advanced House",
     "Advanced Hip Hop", "Junior Waacking", "Junior Locking", "Advanced Waacking",
     "Advanced Locking", "Junior Ballet", "Intermediate Ballet", "Youth Contemporary Company",
@@ -241,6 +241,11 @@ elif st.session_state.logged_in:
                         st.rerun()
                     except Exception as e:
                         st.error(f"Template save failed: {e}")
+
+                if st.button(f"Delete Template {i}", key=f"del_template_{t['id']}"):
+                    supabase.table("templates").delete().eq("id", t["id"]).execute()
+                    st.success("Template deleted.")
+                    st.rerun()
 
         with tabs[1]:
             st.subheader("All Templates")
