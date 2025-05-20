@@ -309,6 +309,7 @@ elif st.session_state.logged_in:
             # Viewing section
             st.markdown("### Class Video Library")
             selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
+            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
             filtered_videos = [v for v in teacher_videos if v["class"] == selected_class]
 
             if not filtered_videos:
