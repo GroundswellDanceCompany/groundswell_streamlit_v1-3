@@ -250,29 +250,36 @@ elif st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"Delete failed: {e}")    
 
+        
         with tabs[2]:
             st.subheader("Student Goals + Comments")
-            if user_goals:
-                selected_student = st.selectbox("Select a student", list(user_goals.keys()))
-                student_goals = user_goals.get(selected_student, [])
 
-                st.markdown(f"### {selected_student}")
-                for g in student_goals:
-                    st.markdown(f"**{g['text']}** ({g['category']}) â due {g['target_date']}")
-                    created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
-                    target = datetime.date.fromisoformat(g["target_date"])
-                    total_days = (target - created).days or 1
-                    elapsed_days = (datetime.date.today() - created).days
-                    progress = min(max(elapsed_days / total_days, 0), 1.0)
-                    st.progress(progress)
-                    st.caption(f"{int(progress * 100)}% complete â due {g['target_date']}")
-                    comment_key = f"comment_{selected_student}_{g['id']}"
-                    new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
-                    if new_comment != g.get("comment", ""):
-                        g["comment"] = new_comment
-                        # save_json removed (Supabase used)(GOALS_FILE, user_goals)
-            else:
-                st.info("No student goals available.")
+            # Collect unique usernames
+            student_usernames = sorted(list(set([g["username"] for g in all_goals])))
+
+            selected_student = st.selectbox("Select a student", student_usernames)
+            student_goals = [g for g in all_goals if g["username"] == selected_student]
+
+            for g in student_goals:
+                st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
+
+                created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]))
+                target = datetime.date.fromisoformat(g["target_date"])
+                total_days = (target - created).days or 1
+                elapsed_days = (datetime.date.today() - created).days
+                progress = min(max(elapsed_days / total_days, 0), 1.0)
+                st.progress(progress)
+                st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+
+                comment_key = f"comment_{selected_student}_{g['id']}"
+                new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
+
+                if new_comment != g.get("comment", ""):
+                    try:
+                        supabase.table("goals").update({"comment": new_comment}).eq("id", g["id"]).execute()
+                        st.success("Comment saved.")
+                    except Exception as e:
+                        st.error(f"Failed to save comment: {e}")
 
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
