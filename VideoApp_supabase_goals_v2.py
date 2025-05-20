@@ -43,10 +43,9 @@ def parse_groups(template):
 
 
 if "username" in st.session_state:
-    user_goals = supabase.table("goals") \
-        .select("*") \
-        .eq("username", st.session_state["username"]) \
-        .execute().data
+    # Load goals
+all_goals = supabase.table("goals").select("*").execute().data
+
 else:
     user_goals = []
     
@@ -384,6 +383,8 @@ elif st.session_state.logged_in:
                 g_text = st.text_input("New Goal")
                 g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
                 g_date = st.date_input("Target Date", datetime.date.today())
+                # Filter for current student's goals
+                user_goals = [g for g in all_goals if g["username"] == st.session_state.username]
 
                 if st.form_submit_button("Add") and g_text:
                     try:
