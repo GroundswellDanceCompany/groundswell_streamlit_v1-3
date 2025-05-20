@@ -449,42 +449,37 @@ elif st.session_state.logged_in:
                     for g in done_goals:
                         st.markdown(f"- **{g['text']}** ({g['category']}) â Completed on {g.get('completed_on', 'N/A')}")
 
+        
         with tabs[2]:
             st.subheader("Templates for You")
-
-            import ast
-
             my_groups = st.session_state.user_groups
 
-            def parse_groups(t):
-                try:
-                    return ast.literal_eval(t.get("groups", "[]"))  # safely parse list
-                except:
-                    return []
-
-            my_templates = [t for t in templates if any(g in my_groups for g in parse_groups(t))]
-            
-            my_groups = st.session_state.user_groups
             my_templates = [
-                t for t in templates if any(g in my_groups for g in t.get("groups", []))
+                t for t in templates
+                if any(group in my_groups for group in parse_groups(t))
             ]
-            
-            for t in my_templates:
-                with st.expander(f"{t['text']} ({t['category']})"):
-                    with st.form(f"form_{t['id']}"):
-                        goal_date = st.date_input("Target Date", datetime.date.today())
-                        submitted = st.form_submit_button("Add to My Goals")
-                        if submitted:
-                            goals.append({
-                                "id": str(uuid.uuid4()),
-                                "text": t['text'],
-                                "category": t['category'],
-                                "target_date": str(goal_date),
-                                "done": False,
-                                "videos": [],
-                                "created_on": str(datetime.date.today())
-                            })
-                            user_goals[user] = goals
+
+            if not my_templates:
+                st.info("No templates assigned to your classes yet.")
+            else:
+                for t in my_templates:
+                    with st.expander(f"{t['text']} ({t['category']})"):
+                        with st.form(f"form_{t['id']}"):
+                            goal_date = st.date_input("Target Date", datetime.date.today())
+                            submitted = st.form_submit_button("Add to My Goals")
+                            if submitted:
+                                new_goal = {
+                                    "id": str(uuid.uuid4()),
+                                    "username": st.session_state.username,
+                                    "text": t["text"],
+                                    "category": t["category"],
+                                    "target_date": str(goal_date),
+                                    "done": False,
+                                    "created_on": str(datetime.date.today()),
+                                    "videos": []
+                                }
+                                supabase.table("goals").insert(new_goal).execute()
+                                st.success("Goal added.")
                             # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
         with tabs[3]:
