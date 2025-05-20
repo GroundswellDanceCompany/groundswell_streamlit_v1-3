@@ -245,12 +245,14 @@ elif st.session_state.logged_in:
         with tabs[1]:
             st.subheader("All Templates")
             for i, t in enumerate(templates):
-                group_display = ", ".join(t.get("groups", [])) if isinstance(t.get("groups", []), list) else str(t.get("groups", []))
-                st.markdown(f"- **{t['text']}** ({t['category']}) → {group_display}")
-                if st.button(f"Delete Template {i+1}", key=f"del_template_{t['id']}"):
-                    supabase.table("templates").delete().eq("id", t["id"]).execute()
-                    st.success("Template deleted.")
-                    st.rerun()
+                st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(ast.literal_eval(t.get('groups', '[]')))}")
+                if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
+                    try:
+                        supabase.table("templates").delete().eq("id", t["id"]).execute()
+                        st.success("Template deleted.")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Delete failed: {e}")    
 
         with tabs[2]:
             st.subheader("Student Goals + Comments")
