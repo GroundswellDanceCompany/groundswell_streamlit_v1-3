@@ -244,12 +244,18 @@ elif st.session_state.logged_in:
                         st.error(f"Template save failed: {e}")
 
         with tabs[1]:
+        with tabs[1]:
             st.subheader("All Templates")
             for i, t in enumerate(templates):
-                st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(ast.literal_eval(t.get('groups', '[]')))}")
+                try:
+                    group_list = ast.literal_eval(t.get("groups", "[]"))
+                except:
+                    group_list = t.get("groups", [])
+                st.markdown(f"- **{t['text']}** ({t['category']}) → {', '.join(group_list)}")
                 if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
                     try:
-                        supabase.table("templates").delete().eq("id", t["id"]).execute()
+                        response = supabase.table("templates").delete().eq("id", t["id"]).execute()
+                        st.write("Delete response:", response)
                         st.success("Template deleted.")
                         st.rerun()
                     except Exception as e:
