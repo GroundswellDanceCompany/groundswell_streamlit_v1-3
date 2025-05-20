@@ -242,11 +242,6 @@ elif st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"Template save failed: {e}")
 
-                if st.button(f"Delete Template {i}", key=f"del_template_{t['id']}"):
-                    supabase.table("templates").delete().eq("id", t["id"]).execute()
-                    st.success("Template deleted.")
-                    st.rerun()
-
         with tabs[1]:
             st.subheader("All Templates")
             for i, t in enumerate(templates):
