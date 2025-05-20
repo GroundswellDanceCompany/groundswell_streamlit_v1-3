@@ -254,7 +254,6 @@ elif st.session_state.logged_in:
                 if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
                     try:
                         response = supabase.table("templates").delete().eq("id", t["id"]).execute()
-                        st.write("Delete response:", response)
                         st.success("Template deleted.")
                         st.rerun()
                     except Exception as e:
