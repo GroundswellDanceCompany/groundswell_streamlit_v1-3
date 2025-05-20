@@ -282,16 +282,9 @@ elif st.session_state.logged_in:
                         st.error(f"Failed to save comment: {e}")
 
         with tabs[3]:
+        with tabs[3]:
             st.subheader("Upload Class Resource Videos")
 
-            teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
-            my_groups = st.session_state.get("user_groups", [])
-            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
-            filtered = [
-                v for v in teacher_videos if v["class"] in my_groups
-            ]
-
-            # Upload section
             video_label = st.text_input("Video Label")
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
             uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
@@ -300,18 +293,17 @@ elif st.session_state.logged_in:
                 if st.button("Upload Video"):
                     filename = f"{uuid.uuid4().hex}_{uploaded.name}"
                     filepath = os.path.join(CLASS_VIDEO_DIR, filename)
+
                     with open(filepath, "wb") as f:
                         f.write(uploaded.getbuffer())
 
-                    video_entry = {
+                    supabase.table("teacher_videos").insert({
                         "label": video_label,
                         "class": video_class,
-                        "filename": filepath,
+                        "filename": filename,  # Only store the filename
                         "uploaded": str(datetime.datetime.now())
-                    }
+                    }).execute()
 
-                    supabase.table("teacher_videos").insert(video_entry).execute()
-                    # save_json removed (Supabase used)(teacher_videos_file, teacher_videos)
                     st.success("Video uploaded successfully.")
 
             # Viewing section
@@ -562,33 +554,32 @@ elif st.session_state.logged_in:
             else:
                 st.caption("No badges yet â keep going!")
                 
-        with tabs[6]:
+        
+        with tabs[6]:  # or wherever you place class resources
             st.subheader("Class Resources from Teacher")
 
-            teacher_videos_file = "teacher_videos# JSON filename removed (Supabase used)"
-            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
-            my_groups = user_info.get("groups", [])
+            my_groups = st.session_state.user_groups if not is_teacher else CLASS_GROUPS
+            all_teacher_videos = supabase.table("teacher_videos").select("*").execute().data
 
-            if not teacher_videos:
-                st.info("No teacher videos available yet.")
+            keyword = st.text_input("Search by keyword (optional)", "")
+            results = [
+                v for v in all_teacher_videos
+                if v["class"] in my_groups and keyword.lower() in v["label"].lower()
+            ]
+
+            if not results:
+                st.info("No videos match your filters.")
             else:
-                # Optional keyword filter
-                keyword = st.text_input("Search by keyword (optional)", "")
-                results = [
-                    v for v in teacher_videos
-                    if v["class"] in my_groups and keyword.lower() in v["label"].lower()
-                ]
+                for v in results:
+                    with st.expander(f"{v['class']} – {v['label']}"):
+                        st.caption(f"Uploaded: {v['uploaded']}")
+                        full_path = os.path.join(CLASS_VIDEO_DIR, v["filename"])
 
-                if not results:
-                    st.warning("No videos match your filters.")
-                else:
-                    for v in results:
-                        with st.expander(f"{v['class']} â {v['label']}"):
-                            st.caption(f"Uploaded: {v['uploaded']}")
-                            if os.path.exists(v["filename"]):
-                                st.video(v["filename"])
-                            else:
-                                st.warning("Video file missing.")
+                        if os.path.exists(full_path):
+                            st.video(full_path)
+                        else:
+                            st.warning("Video file missing.")
+                    
 
         with tabs[7]:
             st.subheader("Groundswell on YouTube")
