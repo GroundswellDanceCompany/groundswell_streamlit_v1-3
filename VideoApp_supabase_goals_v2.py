@@ -7,6 +7,7 @@ import json
 import os
 import ast
 
+
 if "username" not in st.session_state:
     st.session_state.username = ""
 if "logged_in" not in st.session_state:
@@ -34,22 +35,13 @@ for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
     if not os.path.exists(folder):
         os.makedirs(folder)
 
-#def # load_json removed (Supabase used)(filename, default):
-    #if os.path.exists(filename):
-        #with open(filename, "r") as f:
-            #return json.load(f)
-    #return default
+def parse_groups(template):
+    try:
+        return ast.literal_eval(template.get("groups", "[]"))  # safely convert string to list
+    except:
+        return []
 
-#def # save_json removed (Supabase used)(filename, data):
-    #with open(filename, "w") as f:
-        #json.dump(data, f, indent=2)
 
-#if "USER_DB" not in st.session_state:
-    #st.session_state.USER_DB = # load_json removed (Supabase used)(USER_DB_FILE, {
-        #"teacher": {"password": "adminpass", "role": "admin", "groups": []}
-    #})
-
-#user_goals = # load_json removed (Supabase used)(GOALS_FILE, {})
 if "username" in st.session_state:
     user_goals = supabase.table("goals") \
         .select("*") \
