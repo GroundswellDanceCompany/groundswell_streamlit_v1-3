@@ -250,15 +250,11 @@ elif st.session_state.logged_in:
         with tabs[1]:
             st.subheader("All Templates")
             for i, t in enumerate(templates):
-                st.markdown(f"- **{t['text']}** ({t['category']}) â {', '.join(t['groups'])}")
-                if st.button(f"Delete Template {i+1}", key=f"del_template_{i}"):
-                    del templates[i]
-                    # save_json removed (Supabase used)(TEMPLATES_FILE, templates)
+                group_display = ", ".join(t.get("groups", [])) if isinstance(t.get("groups", []), list) else str(t.get("groups", []))
+                st.markdown(f"- **{t['text']}** ({t['category']}) → {group_display}")
+                if st.button(f"Delete Template {i+1}", key=f"del_template_{t['id']}"):
+                    supabase.table("templates").delete().eq("id", t["id"]).execute()
                     st.success("Template deleted.")
-                    st.session_state.template_deleted = True
-
-                if st.session_state.get("template_deleted"):
-                    st.session_state.template_deleted = False
                     st.rerun()
 
         with tabs[2]:
