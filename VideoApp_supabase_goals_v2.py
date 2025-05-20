@@ -354,6 +354,7 @@ elif st.session_state.logged_in:
             "Youtube"
         ])
 
+        user_goals = [g for g in all_goals if g["username"] == st.session_state.username]
         goals = user_goals  # already a list of goals for this user
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
         badges = user_badges.get(user, [])
@@ -391,7 +392,7 @@ elif st.session_state.logged_in:
                 g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
                 g_date = st.date_input("Target Date", datetime.date.today())
                 # Filter for current student's goals
-                user_goals = [g for g in all_goals if g["username"] == st.session_state.username]
+                
 
                 if st.form_submit_button("Add") and g_text:
                     try:
