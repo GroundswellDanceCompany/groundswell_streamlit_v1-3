@@ -264,7 +264,7 @@ elif st.session_state.logged_in:
                 st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
 
                 created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]).split("T")[0])
-                target = datetime.date.fromisoformat(g["target_date"])
+                target = datetime.date.fromisoformat(g["target_date"].split("T")[0])
                 total_days = (target - created).days or 1
                 elapsed_days = (datetime.date.today() - created).days
                 progress = min(max(elapsed_days / total_days, 0), 1.0)
