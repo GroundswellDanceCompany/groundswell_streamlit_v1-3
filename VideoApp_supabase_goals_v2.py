@@ -284,34 +284,40 @@ elif st.session_state.logged_in:
         
         
         with tabs[3]:
-            st.subheader("Upload Class Resource Videos")
+            import time
+
+            st.subheader("Upload Class Resource Video")
 
             video_label = st.text_input("Video Label")
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
-            uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
+            uploaded = st.file_uploader("Select a video", type=["mp4", "mov"])
 
             if uploaded and video_label and video_class:
                 if st.button("Upload Video"):
                     try:
-                        video_filename = f"{uuid.uuid4().hex}_{uploaded.name}"
-                        storage_path = f"{video_class}/{video_filename}"
+                        filename = f"{uuid.uuid4().hex}_{uploaded.name}"
+                        path_in_bucket = f"{filename}"
 
-                        # Upload to Storage
-                        supabase.storage.from_("teachervideos").upload(
-                            path=storage_path,
-                            file=uploaded.getvalue(),
-                            file_options={"content-type": uploaded.type}
+                        # Upload to Supabase Storage
+                        upload_response = supabase.storage.from_("teacher_videos").upload(
+                            path_in_bucket,
+                            uploaded.getbuffer(),
+                            {"content-type": uploaded.type}
                         )
+
+                        if upload_response.status_code != 200:
+                            st.error(f"Upload failed: {upload_response.json()}")
+                            st.stop()
 
                         # Save metadata to teacher_videos table
                         supabase.table("teacher_videos").insert({
                             "label": video_label,
                             "class": video_class,
-                            "filename": storage_path,
-                            "uploaded": str(datetime.datetime.now())
+                            "filename": path_in_bucket,
+                            "uploaded": str(datetime.datetime.now()),
                         }).execute()
 
-                        st.success("Video uploaded and saved.")
+                        st.success("Video uploaded successfully!")
 
                     except Exception as e:
                         st.error(f"Upload failed: {e}")
