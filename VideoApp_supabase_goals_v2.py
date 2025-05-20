@@ -285,26 +285,34 @@ elif st.session_state.logged_in:
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
 
-            video_label = st.text_input("Video Label")
-            video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
-            uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
+            with st.form("upload_form"):
+                video_label = st.text_input("Video Label")
+                video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
+                uploaded_file = st.file_uploader("Upload a video", type=["mp4", "mov"])
+                submit = st.form_submit_button("Upload Video")
 
-            if uploaded and video_label and video_class:
-                if st.button("Upload Video"):
-                    filename = f"{uuid.uuid4().hex}_{uploaded.name}"
-                    filepath = os.path.join(CLASS_VIDEO_DIR, filename)
+                if submit and uploaded_file and video_label and video_class:
+                    unique_filename = f"{uuid.uuid4().hex}_{uploaded_file.name}"
+                    storage_path = f"{video_class}/{unique_filename}"
 
-                    with open(filepath, "wb") as f:
-                        f.write(uploaded.getbuffer())
+                    try:
+                        supabase.storage.from_("teacher_videos").upload(
+                            path=storage_path,
+                            file=uploaded_file.getvalue(),
+                            file_options={"content-type": uploaded_file.type}
+                        )
 
-                    supabase.table("teacher_videos").insert({
-                        "label": video_label,
-                        "class": video_class,
-                        "filename": filename,  # Only store the filename
-                        "uploaded": str(datetime.datetime.now())
-                    }).execute()
+                        video_record = {
+                            "label": video_label,
+                            "class": video_class,
+                            "filename": storage_path,
+                            "uploaded": str(datetime.datetime.now())
+                        }
+                        supabase.table("teacher_videos").insert(video_record).execute()
 
-                    st.success("Video uploaded successfully.")
+                        st.success("Video uploaded successfully.")
+                    except Exception as e:
+                        st.error(f"Upload failed: {e}")
 
             # Viewing section
             st.markdown("### Class Video Library")
@@ -485,6 +493,7 @@ elif st.session_state.logged_in:
                             # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
         with tabs[3]:
+        with tabs[3]:
             st.subheader("Upload Progress Videos")
             for g in goals:
                 with st.expander(f"{g['text']} ({g['category']})"):
@@ -492,35 +501,27 @@ elif st.session_state.logged_in:
                     uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
                     if uploaded and video_label:
                         if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
-                            vid_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
-                            video_path = os.path.join("videos", vid_filename)
-                            with open(video_path, "wb") as f:
-                                f.write(uploaded.getbuffer())
-                            g.setdefault("videos", []).append({
-                                "filename": video_path,
-                                "label": video_label,
-                                "uploaded": str(datetime.datetime.now())
-                            })
-                            st.success(f"Video '{video_label}' uploaded.")
-                            # save_json removed (Supabase used)(GOALS_FILE, user_goals)
-                    if g.get("videos"):
-                        for i, v in enumerate(g["videos"]):
-                            video_file = v["filename"]
-                            label = v.get("label", f"Video {i+1}")
-                            if os.path.exists(video_file):
-                                st.markdown(f"**{label}** â Uploaded: {v['uploaded']}")
-                                st.video(video_file)
-                                if st.button(f"Delete {label}", key=f"del_{g['id']}_{i}"):
-                                    try:
-                                        os.remove(video_file)
-                                    except:
-                                        pass
-                                    del g["videos"][i]
-                                    # save_json removed (Supabase used)(GOALS_FILE, user_goals)
-                                    st.success(f"Deleted {label}")
-                                    st.rerun()
-                            else:
-                                st.warning(f"Missing file: {video_file}")
+                            video_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
+                            video_path = f"{st.session_state.username}/{video_filename}"
+
+                            try:
+                                supabase.storage.from_("student_videos").upload(
+                                    path=video_path,
+                                    file=uploaded.getvalue(),
+                                    file_options={"content-type": uploaded.type}
+                                )
+
+                                g.setdefault("videos", []).append({
+                                    "filename": video_path,
+                                    "label": video_label,
+                                    "uploaded": str(datetime.datetime.now())
+                                })
+
+                                supabase.table("goals").update({"videos": g["videos"]}).eq("id", g["id"]).execute()
+                                st.success(f"Video '{video_label}' uploaded.")
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Upload failed: {e}")
 
         with tabs[4]:
             st.subheader("Today's Goals")
