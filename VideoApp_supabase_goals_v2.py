@@ -244,7 +244,6 @@ elif st.session_state.logged_in:
                         st.error(f"Template save failed: {e}")
 
         with tabs[1]:
-        with tabs[1]:
             st.subheader("All Templates")
             for i, t in enumerate(templates):
                 try:
