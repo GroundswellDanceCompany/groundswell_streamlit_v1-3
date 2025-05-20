@@ -281,7 +281,7 @@ elif st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"Failed to save comment: {e}")
 
-        with tabs[3]:
+        
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
 
