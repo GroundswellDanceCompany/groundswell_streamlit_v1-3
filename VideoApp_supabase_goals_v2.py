@@ -556,30 +556,41 @@ elif st.session_state.logged_in:
                 st.caption("No badges yet â keep going!")
                 
         
-        with tabs[6]:  # or wherever you place class resources
+        with tabs[6]:
             st.subheader("Class Resources from Teacher")
 
-            my_groups = st.session_state.user_groups if not is_teacher else CLASS_GROUPS
-            all_teacher_videos = supabase.table("teacher_videos").select("*").execute().data
+            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
+            my_groups = st.session_state.user_groups
 
-            keyword = st.text_input("Search by keyword (optional)", "")
-            results = [
-                v for v in all_teacher_videos
-                if v["class"] in my_groups and keyword.lower() in v["label"].lower()
-            ]
-
-            if not results:
-                st.info("No videos match your filters.")
+            if not teacher_videos:
+                st.info("No teacher videos available yet.")
             else:
-                for v in results:
-                    with st.expander(f"{v['class']} – {v['label']}"):
-                        st.caption(f"Uploaded: {v['uploaded']}")
-                        full_path = os.path.join(CLASS_VIDEO_DIR, v["filename"])
+                keyword = st.text_input("Search by keyword (optional)", "")
+                results = [
+                    v for v in teacher_videos
+                    if v["class"] in my_groups and keyword.lower() in v["label"].lower()
+                ]
 
-                        if os.path.exists(full_path):
-                            st.video(full_path)
-                        else:
-                            st.warning("Video file missing.")
+                if not results:
+                    st.warning("No videos match your filters.")
+                else:
+                    for v in results:
+                        with st.expander(f"{v['class']} – {v['label']}"):
+                            st.caption(f"Uploaded: {v['uploaded']}")
+                    
+                            # Generate signed URL
+                            try:
+                                signed_url_resp = supabase.storage \
+                                    .from_("teacher_videos") \
+                                    .create_signed_url(v["filename"], expires_in=3600)
+                                video_url = signed_url_resp.get("signedURL")
+
+                                if video_url:
+                                    st.video(video_url)
+                                else:
+                                    st.warning("Video not accessible.")
+                            except Exception as e:
+                                st.error(f"Error loading video: {e}")
                     
 
         with tabs[7]:
