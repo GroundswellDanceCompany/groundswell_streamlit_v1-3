@@ -493,7 +493,6 @@ elif st.session_state.logged_in:
                             # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
         with tabs[3]:
-        with tabs[3]:
             st.subheader("Upload Progress Videos")
             for g in goals:
                 with st.expander(f"{g['text']} ({g['category']})"):
