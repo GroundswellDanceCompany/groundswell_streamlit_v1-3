@@ -284,13 +284,14 @@ elif st.session_state.logged_in:
         
         
         with tabs[3]:
-            import time
+            import datetime
+            import uuid
 
             st.subheader("Upload Class Resource Video")
 
             video_label = st.text_input("Video Label")
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
-            uploaded = st.file_uploader("Select a video", type=["mp4", "mov"])
+            uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
 
             if uploaded and video_label and video_class:
                 if st.button("Upload Video"):
@@ -301,7 +302,7 @@ elif st.session_state.logged_in:
                         # Upload to Supabase Storage
                         upload_response = supabase.storage.from_("teacher_videos").upload(
                             path_in_bucket,
-                            uploaded.getbuffer(),
+                            uploaded.read(),  # Correct format
                             {"content-type": uploaded.type}
                         )
 
@@ -309,12 +310,12 @@ elif st.session_state.logged_in:
                             st.error(f"Upload failed: {upload_response.json()}")
                             st.stop()
 
-                        # Save metadata to teacher_videos table
+                        # Insert video metadata into the teacher_videos table
                         supabase.table("teacher_videos").insert({
                             "label": video_label,
                             "class": video_class,
                             "filename": path_in_bucket,
-                            "uploaded": str(datetime.datetime.now()),
+                            "uploaded": str(datetime.datetime.now())
                         }).execute()
 
                         st.success("Video uploaded successfully!")
@@ -322,24 +323,37 @@ elif st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"Upload failed: {e}")
 
-            # Viewing section
-            # --- Display Video Library ---
+            # --- View Class Library ---
             st.markdown("### Class Video Library")
-            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
+            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS, key="class_filter")
+            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
+            filtered_videos = [v for v in teacher_videos if v["class"] == selected_class]
 
-            videos = supabase.table("teacher_videos").select("*").eq("class", selected_class).execute().data
-
-            if not videos:
-                st.info("No videos for this class.")
+            if not filtered_videos:
+                st.info("No videos uploaded for this class.")
             else:
-                for v in videos:
-                    signed_url = supabase.storage.from_("teachervideos").create_signed_url(
-                        v["filename"],
-                        expires_in=3600
-                    )["signedURL"]
+                for i, v in enumerate(filtered_videos):
+                    st.markdown(f"**{v['label']}** — Uploaded: {v['uploaded']}")
+                    try:
+                        signed_url = supabase.storage.from_("teacher_videos").create_signed_url(
+                            v["filename"], expires_in=3600
+                        )
+                        st.video(signed_url["signedURL"])
+                    except Exception as e:
+                        st.warning(f"Could not load video: {e}")
 
-                    with st.expander(f"{v['label']} — {v['uploaded']}"):
-                        st.video(signed_url)
+                    if st.button(f"Delete {v['label']}", key=f"delete_{i}"):
+                        try:
+                            # Delete file from storage
+                            supabase.storage.from_("teacher_videos").remove(v["filename"])
+
+                            # Delete metadata from table
+                            supabase.table("teacher_videos").delete().eq("id", v["id"]).execute()
+
+                            st.success(f"Deleted {v['label']}")
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Delete failed: {e}")
 
 # Student dashboard goes here...
 
