@@ -284,75 +284,61 @@ elif st.session_state.logged_in:
         
         
         with tabs[3]:
-            import datetime
-            import uuid
-
-            st.subheader("Upload Class Resource Video")
+            st.subheader("Upload Class Resource Videos")
 
             video_label = st.text_input("Video Label")
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
             uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
-            my_groups = st.session_state.get("user_groups", [])
 
             if uploaded and video_label and video_class:
                 if st.button("Upload Video"):
                     try:
+                        # Create a unique filename and path in bucket
                         filename = f"{uuid.uuid4().hex}_{uploaded.name}"
-                        path_in_bucket = f"{filename}"
+                        path_in_bucket = f"{video_class}/{filename}"
 
                         # Upload to Supabase Storage
-                        try:
-                            supabase.storage.from_("teachervideos").upload(
-                                path=path_in_bucket,
-                                file=uploaded,
-                                file_options={"content-type": uploaded.type},
-                                upsert=True
-                            )
-
-                            # Store metadata in teacher_videos table
-                            supabase.table("teacher_videos").insert({
-                                "label": video_label,
-                                "class": video_class,
-                                "filename": path_in_bucket,
-                                "uploaded": str(datetime.datetime.now())
-                            }).execute()
-
-                            st.success("Video uploaded successfully.")
-
-                        except Exception as e:
-                            st.error(f"Upload failed: {e}")
-
-            # --- View Class Library ---
-            st.markdown("### Class Video Library")
-            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS, key="class_filter")
-            teacher_videos = supabase.table("teacher_videos").select("*").execute().data
-            filtered_videos = [v for v in teacher_videos if v["class"] == selected_class]
-
-            if not filtered_videos:
-                st.info("No videos uploaded for this class.")
-            else:
-                for i, v in enumerate(filtered_videos):
-                    st.markdown(f"**{v['label']}** — Uploaded: {v['uploaded']}")
-                    try:
-                        signed_url = supabase.storage.from_("teacher_videos").create_signed_url(
-                            v["filename"], expires_in=3600
+                        supabase.storage.from_("teachervideos").upload(
+                            path=path_in_bucket,
+                            file=uploaded,
+                            file_options={"content-type": uploaded.type},
+                            upsert=True
                         )
-                        st.video(signed_url["signedURL"])
+
+                        # Store metadata in teacher_videos table
+                        supabase.table("teacher_videos").insert({
+                            "label": video_label,
+                            "class": video_class,
+                            "filename": path_in_bucket,
+                            "uploaded": str(datetime.datetime.now())
+                        }).execute()
+
+                        st.success("Video uploaded successfully.")
+
                     except Exception as e:
-                        st.warning(f"Could not load video: {e}")
+                        st.error(f"Upload failed: {e}")
 
-                    if st.button(f"Delete {v['label']}", key=f"delete_{i}"):
+            # Display stored videos
+            st.markdown("### Class Video Library")
+            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
+            try:
+                teacher_videos = supabase.table("teacher_videos").select("*").eq("class", selected_class).execute().data
+
+                if not teacher_videos:
+                    st.info("No videos uploaded for this class.")
+                else:
+                    for video in teacher_videos:
+                        st.markdown(f"**{video['label']}** — uploaded {video['uploaded']}")
                         try:
-                            # Delete file from storage
-                            supabase.storage.from_("teacher_videos").remove(v["filename"])
-
-                            # Delete metadata from table
-                            supabase.table("teacher_videos").delete().eq("id", v["id"]).execute()
-
-                            st.success(f"Deleted {v['label']}")
-                            st.rerun()
+                            signed_url = supabase.storage.from_("teachervideos").create_signed_url(
+                                video["filename"],
+                                expires_in=3600
+                            )["signedURL"]
+                            st.video(signed_url)
                         except Exception as e:
-                            st.error(f"Delete failed: {e}")
+                            st.warning(f"Could not load video: {e}")
+            except Exception as e:
+                st.error(f"Failed to load videos: {e}")
 
 # Student dashboard goes here...
 
