@@ -310,14 +310,14 @@ elif st.session_state.logged_in:
                             st.error(f"Upload failed: {upload_response.json()}")
                             st.stop()
 
-                        # Insert video metadata into the teacher_videos table
-                        supabase.table("teacher_videos").insert({
-                            "id": str(uuid.uuid4()),
+                        video_entry = {
                             "label": video_label,
                             "class": video_class,
-                            "filename": path_in_bucket,
+                            "filename": filepath,
                             "uploaded": str(datetime.datetime.now())
-                        }).execute()
+                        }
+
+                        supabase.table("teacher_videos").insert(video_entry).execute()# Insert video metadata into the teacher_videos table
 
                         st.success("Video uploaded successfully!")
 
