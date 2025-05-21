@@ -293,16 +293,14 @@ elif st.session_state.logged_in:
             if uploaded and video_label and video_class:
                 if st.button("Upload Video"):
                     try:
-                        # Create a unique filename and path in bucket
                         filename = f"{uuid.uuid4().hex}_{uploaded.name}"
                         path_in_bucket = f"{video_class}/{filename}"
 
-                        # Upload to Supabase Storage
+                        # Upload to Supabase Storage (without 'upsert')
                         supabase.storage.from_("teachervideos").upload(
                             path=path_in_bucket,
                             file=uploaded,
-                            file_options={"content-type": uploaded.type},
-                            upsert=True
+                            file_options={"content-type": uploaded.type}
                         )
 
                         # Store metadata in teacher_videos table
@@ -318,7 +316,6 @@ elif st.session_state.logged_in:
                     except Exception as e:
                         st.error(f"Upload failed: {e}")
 
-            # Display stored videos
             st.markdown("### Class Video Library")
             selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
             try:
