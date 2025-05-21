@@ -301,30 +301,26 @@ elif st.session_state.logged_in:
                         path_in_bucket = f"{filename}"
 
                         # Upload to Supabase Storage
-                        upload_response = supabase.storage.from_("teachervideos").upload(
-                            path_in_bucket,
-                            uploaded.read(),  # Correct format
-                            {"content-type": uploaded.type}
-                        )
+                        try:
+                            supabase.storage.from_("teachervideos").upload(
+                                path=path_in_bucket,
+                                file=uploaded,
+                                file_options={"content-type": uploaded.type},
+                                upsert=True
+                            )
 
-                        if upload_response.status_code != 200:
-                            st.error(f"Upload failed: {upload_response.json()}")
-                            st.stop()
+                            # Store metadata in teacher_videos table
+                            supabase.table("teacher_videos").insert({
+                                "label": video_label,
+                                "class": video_class,
+                                "filename": path_in_bucket,
+                                "uploaded": str(datetime.datetime.now())
+                            }).execute()
 
-                        supabase.table("teacher_videos").insert({
-                            "label": video_label,
-                            "class": video_class,
-                            "filename": path_in_bucket,
-                            "uploaded": str(datetime.datetime.now()),
-                            "username": st.session_state.username  # This line is critical
-                        }).execute()
+                            st.success("Video uploaded successfully.")
 
-                        
-
-                        st.success("Video uploaded successfully!")
-
-                    except Exception as e:
-                        st.error(f"Upload failed: {e}")
+                        except Exception as e:
+                            st.error(f"Upload failed: {e}")
 
             # --- View Class Library ---
             st.markdown("### Class Video Library")
