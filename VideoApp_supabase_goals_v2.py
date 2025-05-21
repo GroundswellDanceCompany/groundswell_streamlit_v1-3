@@ -6,6 +6,7 @@ import datetime
 import json
 import os
 import ast
+import io
 
 
 if "username" not in st.session_state:
@@ -296,14 +297,17 @@ elif st.session_state.logged_in:
                         filename = f"{uuid.uuid4().hex}_{uploaded.name}"
                         path_in_bucket = f"{video_class}/{filename}"
 
-                        # Upload to Supabase Storage (without 'upsert')
+                        # Wrap buffer in BytesIO so it's accepted by Supabase
+                        file_bytes = io.BytesIO(uploaded.getbuffer())
+
+                        # Upload to Supabase Storage
                         supabase.storage.from_("teachervideos").upload(
                             path=path_in_bucket,
-                            file=uploaded.getbuffer(),  # This is the key fix
+                            file=file_bytes,
                             file_options={"content-type": uploaded.type}
                         )
 
-                        # Store metadata in teacher_videos table
+                        # Save video metadata to Supabase table
                         supabase.table("teacher_videos").insert({
                             "label": video_label,
                             "class": video_class,
