@@ -312,6 +312,7 @@ elif st.session_state.logged_in:
 
                         # Insert video metadata into the teacher_videos table
                         supabase.table("teacher_videos").insert({
+                            "id": str(uuid.uuid4()),
                             "label": video_label,
                             "class": video_class,
                             "filename": path_in_bucket,
