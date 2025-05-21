@@ -300,7 +300,7 @@ elif st.session_state.logged_in:
                         path_in_bucket = f"{filename}"
 
                         # Upload to Supabase Storage
-                        upload_response = supabase.storage.from_("teacher_videos").upload(
+                        upload_response = supabase.storage.from_("teachervideos").upload(
                             path_in_bucket,
                             uploaded.read(),  # Correct format
                             {"content-type": uploaded.type}
