@@ -311,16 +311,13 @@ elif st.session_state.logged_in:
                             st.error(f"Upload failed: {upload_response.json()}")
                             st.stop()
 
-                        try:
-                            supabase.table("teacher_videos").insert({
-                                "id": str(uuid.uuid4()),
-                                "label": video_label,
-                                "class": video_class,
-                                "filename": path_in_bucket,
-                                "uploaded": str(datetime.datetime.now())
-                             }).execute()
-                        except Exception as e:
-                            st.error(f"Insert failed: {e}")
+                        supabase.table("teacher_videos").insert({
+                            "label": video_label,
+                            "class": video_class,
+                            "filename": path_in_bucket,
+                            "uploaded": str(datetime.datetime.now()),
+                            "username": st.session_state.username  # This line is critical
+                        }).execute()
 
                         
 
