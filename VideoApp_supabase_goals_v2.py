@@ -299,7 +299,7 @@ elif st.session_state.logged_in:
                         # Upload to Supabase Storage (without 'upsert')
                         supabase.storage.from_("teachervideos").upload(
                             path=path_in_bucket,
-                            file=uploaded,
+                            file=uploaded.getbuffer(),  # This is the key fix
                             file_options={"content-type": uploaded.type}
                         )
 
