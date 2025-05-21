@@ -7,6 +7,7 @@ import json
 import os
 import ast
 import io
+import tempfile  
 
 
 if "username" not in st.session_state:
@@ -297,17 +298,19 @@ elif st.session_state.logged_in:
                         filename = f"{uuid.uuid4().hex}_{uploaded.name}"
                         path_in_bucket = f"{video_class}/{filename}"
 
-                        # Wrap buffer in BytesIO so it's accepted by Supabase
-                        file_bytes = io.BytesIO(uploaded.getbuffer())
+                        # Save to a temporary file
+                        with tempfile.NamedTemporaryFile(delete=False) as tmp_file:
+                            tmp_file.write(uploaded.read())
+                            tmp_path = tmp_file.name
 
-                        # Upload to Supabase Storage
+                        # Upload to Supabase bucket
                         supabase.storage.from_("teachervideos").upload(
                             path=path_in_bucket,
-                            file=file_bytes,
+                            file=tmp_path,
                             file_options={"content-type": uploaded.type}
                         )
 
-                        # Save video metadata to Supabase table
+                        # Insert metadata into teacher_videos table
                         supabase.table("teacher_videos").insert({
                             "label": video_label,
                             "class": video_class,
