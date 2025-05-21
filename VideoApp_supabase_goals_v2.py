@@ -292,6 +292,7 @@ elif st.session_state.logged_in:
             video_label = st.text_input("Video Label")
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
             uploaded = st.file_uploader("Select a video to upload", type=["mp4", "mov"])
+            my_groups = st.session_state.get("user_groups", [])
 
             if uploaded and video_label and video_class:
                 if st.button("Upload Video"):
