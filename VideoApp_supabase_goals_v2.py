@@ -307,11 +307,11 @@ elif st.session_state.logged_in:
 
                         # Insert metadata into the teacher_videos table
                         supabase.table("teacher_videos").insert({
+                            "username": st.session_state.username,
                             "label": video_label,
                             "class": video_class,
                             "filename": path_in_bucket,
-                            "uploaded": str(datetime.datetime.now()),
-                            "username": supabase.auth.get_user().user.id
+                            "uploaded": str(datetime.datetime.now())
                         }).execute()
 
                         st.success("Video uploaded successfully.")
