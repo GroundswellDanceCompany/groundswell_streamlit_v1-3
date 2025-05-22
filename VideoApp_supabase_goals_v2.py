@@ -311,7 +311,7 @@ elif st.session_state.logged_in:
                             "class": video_class,
                             "filename": path_in_bucket,
                             "uploaded": str(datetime.datetime.now()),
-                            "username": st.session_state.username  # Optional: to track who uploaded
+                            "username": supabase.auth.get_user().user.id
                         }).execute()
 
                         st.success("Video uploaded successfully.")
