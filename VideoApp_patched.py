@@ -168,29 +168,24 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
         st.session_state.mode = "reset"
         st.rerun()
 
+# --- Signup Block (Supabase Auth) ---
 elif not st.session_state.logged_in and st.session_state.mode == "signup":
     st.title("Create Student Account")
-    new_user = st.text_input("New Username")
+    new_user = st.text_input("New Email (this will be your login)")
     new_pass = st.text_input("New Password", type="password")
     groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
 
     if st.button("Create"):
         try:
-            signup_response = supabase.auth.sign_up({
+            auth_response = supabase.auth.sign_up({
                 "email": new_user,
                 "password": new_pass
             })
-            user = signup_response.user
-            if user:
-                supabase.table("users").insert({
-                    "id": user.id,
-                    "email": new_user,
-                    "role": "student"
-                }).execute()
 
+            user = auth_response.user
+            if user:
                 supabase.table("profiles").insert({
                     "id": user.id,
-                    "email": new_user,
                     "role": "student",
                     "groups": groups
                 }).execute()
@@ -199,9 +194,14 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                 st.session_state.mode = "login"
                 st.rerun()
             else:
-                st.error("Signup failed.")
+                st.error("Signup failed. Please try again.")
         except Exception as e:
             st.error(f"Signup failed: {e}")
+
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
+
 
         existing = supabase.table("users").select("username").eq("username", new_user).execute().data
         if existing:
