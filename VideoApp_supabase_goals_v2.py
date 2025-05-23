@@ -292,32 +292,29 @@ elif st.session_state.logged_in:
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
             uploaded_file = st.file_uploader("Select a video file", type=["mp4", "mov"])
 
-            if uploaded_file and video_label and video_class:
-                if st.button("Upload Video"):
-                    try:
-                        # Generate a unique filename
-                        filename = f"{uuid.uuid4().hex}_{uploaded_file.name}"
-                        path_in_bucket = f"{filename}"
+            if uploaded and video_label and video_class:
+                filename = f"{uuid.uuid4().hex}_{uploaded.name}"
+                data = uploaded.read()  # read as bytes
+                path_in_bucket = f"{filename}"
 
-                        # Upload to Supabase Storage
-                        supabase.storage.from_("teachervideos").upload(
-                            path=path_in_bucket,
-                            file=uploaded_file.getvalue()
-                        )
+                try:
+                    # Upload to Supabase bucket
+                    supabase.storage.from_("teachervideos").upload(path_in_bucket, data)
 
-                        # Insert metadata into the teacher_videos table
-                        supabase.table("teacher_videos").insert({
-                            "username": st.session_state.username,
-                            "label": video_label,
-                            "class": video_class,
-                            "filename": path_in_bucket,
-                            "uploaded": str(datetime.datetime.now())
-                        }).execute()
+                    # Save metadata to table
+                    supabase.table("teacher_videos").insert({
+                        "id": str(uuid.uuid4()),
+                        "label": video_label,
+                        "class": video_class,
+                        "filename": path_in_bucket,
+                        "uploaded": str(datetime.datetime.now()),
+                        "username": st.session_state.username
+                    }).execute()
 
-                        st.success("Video uploaded successfully.")
+                    st.success("Video uploaded successfully!")
 
-                    except Exception as e:
-                        st.error(f"Upload failed: {e}")
+                except Exception as e:
+                    st.error(f"Upload failed: {e}")
 
             st.markdown("### Class Video Library")
 
