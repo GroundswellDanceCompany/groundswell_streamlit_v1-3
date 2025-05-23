@@ -132,17 +132,34 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Login")
     username = st.text_input("Username")
     password = st.text_input("Password", type="password")
-    
+
     if st.button("Login"):
-        result = supabase.table("users").select("*").eq("username", username).execute()
-        users = result.data
-        if users and users[0]["password"] == password:
-            st.session_state.logged_in = True
-            st.session_state.username = username
-            st.session_state.user_role = users[0]["role"]
-            st.session_state.user_groups = users[0].get("groups", [])
-        else:
-            st.error("Invalid login.")
+        try:
+            auth_response = supabase.auth.sign_in_with_password({
+                "email": username,
+                "password": password
+            })
+
+            user = auth_response.user
+            if user:
+                st.session_state.logged_in = True
+                st.session_state.username = user.email
+                st.session_state.user_id = user.id  # <- This is the UUID you use in tables
+            else:
+                st.error("Invalid login credentials.")
+        except Exception as e:
+            st.error(f"Login failed: {e}")
+            
+    #if st.button("Login"):
+        #result = supabase.table("users").select("*").eq("username", username).execute()
+        #users = result.data
+        #if users and users[0]["password"] == password:
+            #st.session_state.logged_in = True
+            #st.session_state.username = username
+            #st.session_state.user_role = users[0]["role"]
+            #st.session_state.user_groups = users[0].get("groups", [])
+        #else:
+            #st.error("Invalid login.")
 
     if st.button("Sign Up"):
         st.session_state.mode = "signup"
