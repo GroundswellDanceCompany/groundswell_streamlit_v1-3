@@ -197,13 +197,6 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                     "groups": []  # or some default
                 }).execute()
             
-            if user:
-                # Insert into profiles if needed
-                supabase.table("profiles").insert({
-                    "id": user_id,
-                    "role": "student",
-                    "groups": groups
-                }).execute()
                 st.success("Account created!")
                 st.session_state.mode = "login"
                 st.rerun()
@@ -237,13 +230,6 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         except Exception as e:
             st.error(f"Reset failed: {e}")
 
-    if st.button("Back"):
-        st.session_state.mode = "login"
-        st.rerun()
-
-    if st.button("Back"):
-        st.session_state.mode = "login"
-        st.rerun()
 
 # --- Main App ---
 elif st.session_state.get("logged_in"):
