@@ -138,7 +138,6 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 "email": username,
                 "password": password
             })
-
             user = auth_response.user
 
             if user:
@@ -146,7 +145,7 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 st.session_state.username = user.email
                 st.session_state.user_id = user.id
 
-                # Fetch role and groups from 'profiles' table
+                # Check if profile exists
                 profile = supabase.table("profiles").select("*").eq("id", user.id).execute().data
                 if profile:
                     st.session_state.user_role = profile[0].get("role", "student")
@@ -154,38 +153,11 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 else:
                     st.session_state.user_role = "student"
                     st.session_state.user_groups = []
-
-                # Determine role (customize this logic as needed)
-                role = "admin" if user.email == "groundswelldancecompany@gmail.com" else "student"
-
-                # Check if profile exists
-                profile_check = supabase.table("profiles").select("id").eq("id", user.id).execute().data
-                if not profile_check:
-                    supabase.table("profiles").insert({
-                        "id": user.id,
-                        "role": role,
-                        "groups": []  # can be extended later
-                    }).execute()
-
-                st.session_state.user_role = role
-                st.session_state.user_groups = []  # you can load from DB later if needed
-
             else:
                 st.error("Invalid login credentials.")
-
         except Exception as e:
             st.error(f"Login failed: {e}")
             
-    #if st.button("Login"):
-        #result = supabase.table("users").select("*").eq("username", username).execute()
-        #users = result.data
-        #if users and users[0]["password"] == password:
-            #st.session_state.logged_in = True
-            #st.session_state.username = username
-            #st.session_state.user_role = users[0]["role"]
-            #st.session_state.user_groups = users[0].get("groups", [])
-        #else:
-            #st.error("Invalid login.")
 
     if st.button("Sign Up"):
         st.session_state.mode = "signup"
