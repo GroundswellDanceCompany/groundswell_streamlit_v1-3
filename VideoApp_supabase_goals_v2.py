@@ -292,7 +292,7 @@ elif st.session_state.logged_in:
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
             uploaded_file = st.file_uploader("Select a video file", type=["mp4", "mov"])
 
-            if uploaded and video_label and video_class:
+            if uploaded_file and video_label and video_class:
                 filename = f"{uuid.uuid4().hex}_{uploaded.name}"
                 data = uploaded.read()  # read as bytes
                 path_in_bucket = f"{filename}"
