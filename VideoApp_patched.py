@@ -207,9 +207,9 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
             except Exception as e:
                 st.error(f"Signup failed: {e}")
 
-    if st.button("Back"):
-        st.session_state.mode = "login"
-        st.rerun()
+        if st.button("Back"):
+            st.session_state.mode = "login"
+            st.rerun()
         
         else:
             supabase.table("users").insert({
