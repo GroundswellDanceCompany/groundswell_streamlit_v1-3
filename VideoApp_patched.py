@@ -179,7 +179,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
     new_pass = st.text_input("Password", type="password")
     selected_groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
 
- if st.button("Create"):
+if st.button("Create"):
     try:
         # Sign up using Supabase Auth
         auth_response = supabase.auth.sign_up({
