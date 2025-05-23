@@ -179,23 +179,24 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
     new_pass = st.text_input("Password", type="password")
     selected_groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
 
-    if st.button("Create"):
-        try:
-            # Sign up using Supabase Auth
-            auth_response = supabase.auth.sign_up({
-                "email": new_user,
-                "password": new_pass
-            })
-            user = auth_response.user
+ if st.button("Create"):
+    try:
+        # Sign up using Supabase Auth
+        auth_response = supabase.auth.sign_up({
+            "email": new_user,
+            "password": new_pass
+        })
 
-            st.success("Account created successfully. Please log in.")
+        user = auth_response.user
+
+        if user:
+            st.success("Account created successfully. Please check your email to verify your account.")
             st.session_state.mode = "login"
             st.rerun()
         else:
             st.error("Sign up failed. No user returned.")
     except Exception as e:
         st.error(f"Signup failed: {e}")
-
     if st.button("Back"):
         st.session_state.mode = "login"
         st.rerun()
