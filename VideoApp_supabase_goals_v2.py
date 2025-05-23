@@ -288,70 +288,43 @@ elif st.session_state.logged_in:
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
 
+            # Upload Section
             video_label = st.text_input("Video Label")
             video_class = st.selectbox("Assign to Class", CLASS_GROUPS)
-            uploaded_file = st.file_uploader("Select a video file", type=["mp4", "mov"])
+            uploaded = st.file_uploader("Select a video", type=["mp4", "mov"])
 
-            if uploaded_file and video_label and video_class:
-                filename = f"{uuid.uuid4().hex}_{uploaded_file.name}"
-                data = uploaded_file.read()
-                path_in_bucket = f"{filename}"
+            if uploaded and video_label and video_class:
+                if st.button("Upload Video"):
+                    filename = f"{uuid.uuid4().hex}_{uploaded.name}"
+                    filepath = os.path.join("teacher_videos", filename)
+                    with open(filepath, "wb") as f:
+                        f.write(uploaded.getbuffer())
 
-                try:
-                    # Upload to Supabase bucket
-                    supabase.storage.from_("teachervideos").upload(path_in_bucket, data)
-
-                    # Save metadata to table
+                    # Store metadata in Supabase table
                     supabase.table("teacher_videos").insert({
-                        "id": str(uuid.uuid4()),
                         "label": video_label,
                         "class": video_class,
-                        "filename": path_in_bucket,
+                        "filename": filepath,
                         "uploaded": str(datetime.datetime.now()),
                         "username": st.session_state.username
                     }).execute()
+                    st.success("Video uploaded successfully.")
 
-                    st.success("Video uploaded successfully!")
-
-                except Exception as e:
-                    st.error(f"Upload failed: {e}")
-
+            # View Section
             st.markdown("### Class Video Library")
+            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS, key="view_class")
+            response = supabase.table("teacher_videos").select("*").eq("class", selected_class).execute()
+            teacher_videos = response.data
 
-            # Fetch videos from table
-            result = supabase.table("teacher_videos").select("*").execute()
-            teacher_videos = result.data if result.data else []
-
-            selected_class = st.selectbox("Filter by Class", CLASS_GROUPS)
-            filtered_videos = [v for v in teacher_videos if v["class"] == selected_class]
-
-            if not filtered_videos:
+            if not teacher_videos:
                 st.info("No videos uploaded for this class.")
             else:
-                for i, v in enumerate(filtered_videos):
-                    st.markdown(f"**{v['label']}** — Uploaded: {v['uploaded']}")
-
-                    try:
-                        signed_url_resp = supabase.storage.from_("teachervideos").create_signed_url(
-                            v["filename"], expires_in=3600
-                        )
-                        video_url = signed_url_resp.get("signedURL")
-
-                        if video_url:
-                            st.video(video_url)
-                            if st.button(f"Delete {v['label']}", key=f"del_teacher_video_{i}"):
-                                # Delete from storage
-                                supabase.storage.from_("teachervideos").remove([v["filename"]])
-
-                                # Delete from table
-                                supabase.table("teacher_videos").delete().eq("id", v["id"]).execute()
-
-                                st.success(f"Deleted {v['label']}")
-                                st.rerun()
-                        else:
-                            st.warning("Could not generate video link.")
-                    except Exception as e:
-                        st.warning(f"Video not found or error occurred: {e}")
+                for v in teacher_videos:
+                    st.markdown(f"**{v['label']}** — uploaded {v['uploaded']}")
+                    if os.path.exists(v["filename"]):
+                        st.video(v["filename"])
+                    else:
+                        st.warning("Video file missing.")
 
 # Student dashboard goes here...
 
