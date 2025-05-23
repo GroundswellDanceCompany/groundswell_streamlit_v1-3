@@ -181,27 +181,19 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                 "email": new_user,
                 "password": new_pass
             })
-
             user = auth_response.user
             if user:
+                # Insert into profiles if needed
                 supabase.table("profiles").insert({
-                    "id": st.session_state.user_id,
+                    "id": user.id,
                     "role": "student",
                     "groups": groups
                 }).execute()
-
-                st.success("Account created! Please log in.")
+                st.success("Account created!")
                 st.session_state.mode = "login"
                 st.rerun()
-            else:
-                st.error("Signup failed. Please try again.")
         except Exception as e:
             st.error(f"Signup failed: {e}")
-
-
-        existing = supabase.table("users").select("username").eq("username", new_user).execute().data
-        if existing:
-            st.error("Username already exists.")
         else:
             supabase.table("users").insert({
                 "username": new_user,
