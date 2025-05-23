@@ -172,6 +172,7 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
 elif not st.session_state.logged_in and st.session_state.mode == "signup":
     st.title("Create Student Account")
 
+    new_user = st.text_input("Email")
     new_email = st.text_input("Email")
     new_pass = st.text_input("Password", type="password")
     selected_groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
