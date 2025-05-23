@@ -125,7 +125,12 @@ BADGE_EMOJIS = {
 def logout():
     st.session_state.logged_in = False
     st.session_state.username = ""
+    st.session_state.user_id = ""
+    st.session_state.user_role = ""
+    st.session_state.user_groups = []
     st.session_state.mode = "login"
+    supabase.auth.sign_out()
+    st.rerun()
 
 if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Login")
@@ -245,7 +250,6 @@ elif st.session_state.get("logged_in"):
     st.session_state.user_role = profile.get("role", "student")
     st.session_state.user_groups = profile.get("groups", [])
     
-    user = st.session_state.username
     user_info = {
         "profile": {
         "id": st.session_state.get("user_id"),
@@ -253,7 +257,7 @@ elif st.session_state.get("logged_in"):
         "groups": st.session_state.user_groups
         }
     }
-    is_teacher = user_info["profile"]["role"] == "admin"
+    is_teacher = st.session_state.get("user_role") == "admin"
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
 
