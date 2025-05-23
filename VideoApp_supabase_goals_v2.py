@@ -217,7 +217,9 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 elif st.session_state.logged_in:
     user = st.session_state.username
     user_info = {
-    "role": st.session_state.user_role,
+    "profile": {
+    "id": st.session_state.get("user_id"),
+    "role": st.session_state.get("user_role", "student"),  # default to student
     "groups": st.session_state.user_groups
 }
     is_teacher = user_info["role"] == "admin"
