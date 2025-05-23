@@ -185,7 +185,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
             if user:
                 # Insert into profiles if needed
                 supabase.table("profiles").insert({
-                    "id": user.id,
+                    "id": st.session_state.get("user_id"),
                     "role": "student",
                     "groups": groups
                 }).execute()
