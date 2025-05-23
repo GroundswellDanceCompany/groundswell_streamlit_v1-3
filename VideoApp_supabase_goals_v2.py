@@ -294,7 +294,7 @@ elif st.session_state.logged_in:
 
             if uploaded_file and video_label and video_class:
                 filename = f"{uuid.uuid4().hex}_{uploaded_file.name}"
-                data = uploaded.read()  # read as bytes
+                data = uploaded_file.read()
                 path_in_bucket = f"{filename}"
 
                 try:
