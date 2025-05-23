@@ -293,7 +293,7 @@ elif st.session_state.logged_in:
             uploaded_file = st.file_uploader("Select a video file", type=["mp4", "mov"])
 
             if uploaded_file and video_label and video_class:
-                filename = f"{uuid.uuid4().hex}_{uploaded.name}"
+                filename = f"{uuid.uuid4().hex}_{uploaded_file.name}"
                 data = uploaded.read()  # read as bytes
                 path_in_bucket = f"{filename}"
 
