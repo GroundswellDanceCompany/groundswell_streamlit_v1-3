@@ -181,11 +181,14 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                 "email": new_user,
                 "password": new_pass
             })
-            user = auth_response.user
+            
+            user = supabase.auth.get_user().user
+            user_id = user.id
+            
             if user:
                 # Insert into profiles if needed
                 supabase.table("profiles").insert({
-                    "id": st.session_state.get("user_id"),
+                    "id": user_id,
                     "role": "student",
                     "groups": groups
                 }).execute()
