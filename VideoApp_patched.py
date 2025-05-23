@@ -188,13 +188,13 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
             })
             user = auth_response.user
 
-                st.success("Account created successfully. Please log in.")
-                st.session_state.mode = "login"
-                st.rerun()
-            else:
-                st.error("Sign up failed. No user returned.")
-        except Exception as e:
-            st.error(f"Signup failed: {e}")
+            st.success("Account created successfully. Please log in.")
+            st.session_state.mode = "login"
+            st.rerun()
+        else:
+            st.error("Sign up failed. No user returned.")
+    except Exception as e:
+        st.error(f"Signup failed: {e}")
 
     if st.button("Back"):
         st.session_state.mode = "login"
