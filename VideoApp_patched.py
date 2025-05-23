@@ -213,10 +213,6 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
             st.session_state.mode = "login"
             st.rerun()
 
-    if st.button("Back"):
-        st.session_state.mode = "login"
-        st.rerun()
-
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
     st.title("Reset Your Password")
 
@@ -229,6 +225,10 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
             st.session_state.mode = "login"
         except Exception as e:
             st.error(f"Reset failed: {e}")
+
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
 
 
 # --- Main App ---
