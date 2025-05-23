@@ -150,12 +150,30 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
             })
 
             user = auth_response.user
+
             if user:
                 st.session_state.logged_in = True
                 st.session_state.username = user.email
-                st.session_state.user_id = user.id  # <- This is the UUID you use in tables
+                st.session_state.user_id = user.id
+
+                # Determine role (customize this logic as needed)
+                role = "admin" if user.email == "groundswelldancecompany@gmail.com" else "student"
+
+                # Check if profile exists
+                profile_check = supabase.table("profiles").select("id").eq("id", user.id).execute().data
+                if not profile_check:
+                    supabase.table("profiles").insert({
+                        "id": user.id,
+                        "role": role,
+                        "groups": []  # can be extended later
+                    }).execute()
+
+                st.session_state.user_role = role
+                st.session_state.user_groups = []  # you can load from DB later if needed
+
             else:
                 st.error("Invalid login credentials.")
+
         except Exception as e:
             st.error(f"Login failed: {e}")
             
