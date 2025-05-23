@@ -181,7 +181,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
 
 if st.button("Create"):
     try:
-        # Sign up using Supabase Auth
+        # Supabase Auth sign up
         auth_response = supabase.auth.sign_up({
             "email": new_user,
             "password": new_pass
@@ -190,13 +190,24 @@ if st.button("Create"):
         user = auth_response.user
 
         if user:
-            st.success("Account created successfully. Please check your email to verify your account.")
+            # Optional: Wait briefly for the trigger to insert the row
+            import time
+            time.sleep(1)
+
+            # Update the user's profile with role and groups
+            supabase.table("profiles").update({
+                "role": "student",
+                "groups": selected_groups
+            }).eq("id", user.id).execute()
+
+            st.success("Account created! Please check your email to verify before logging in.")
             st.session_state.mode = "login"
             st.rerun()
         else:
-            st.error("Sign up failed. No user returned.")
+            st.error("Signup failed. No user returned.")
     except Exception as e:
         st.error(f"Signup failed: {e}")
+        
     if st.button("Back"):
         st.session_state.mode = "login"
         st.rerun()
