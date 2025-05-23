@@ -213,19 +213,21 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
         st.rerun()
 
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
-    st.title("Reset Password")
-    user = st.text_input("Username")
-    new_pass = st.text_input("New Password", type="password")
+    st.title("Reset Your Password")
 
-    if st.button("Reset"):
-        result = supabase.table("users").select("*").eq("username", user).execute().data
-        if result:
-            supabase.table("users").update({"password": new_pass}).eq("username", user).execute()
-            st.success("Password reset.")
+    user_email = st.text_input("Enter your email")
+
+    if st.button("Send Reset Link"):
+        try:
+            supabase.auth.reset_password_email(user_email)
+            st.success("Check your inbox for a reset link.")
             st.session_state.mode = "login"
-            st.rerun()
-        else:
-            st.error("User not found.")
+        except Exception as e:
+            st.error(f"Reset failed: {e}")
+
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
 
     if st.button("Back"):
         st.session_state.mode = "login"
