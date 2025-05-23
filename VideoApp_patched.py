@@ -189,14 +189,13 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
 
                 user = auth_response.user
                 if user:
-                    # Save profile details in profiles table
-                    profile_data = {
-                        "id": user.id,  # Must match auth.uid()
-                        "role": "student",
-                        "groups": selected_groups  # List column
-                    }
-
-                    supabase.table("profiles").insert(profile_data).execute()
+    # Then insert into profiles table
+                    supabase.table("profiles").insert({
+                        "id": user.id,                      # This must match auth.uid()
+                        "username": new_user,
+                        "role": "student",                  # Or "admin"
+                        "groups": selected_groups           # This should be defined above
+                    }).execute()
 
                     st.success("Account created! Please log in.")
                     st.session_state.mode = "login"
