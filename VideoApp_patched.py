@@ -206,17 +206,32 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
         st.rerun()
 
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
-    st.title("Reset Your Password")
+    st.title("Reset Password")
 
-    user_email = st.text_input("Enter your email")
+    user_email = st.text_input("Enter your email to reset password")
 
-    if st.button("Send Reset Link"):
-        try:
-            supabase.auth.reset_password_email(user_email)
-            st.success("Check your inbox for a reset link.")
+    if st.button("Send Reset Email"):
+        RESET_ENDPOINT = f"{SUPABASE_URL}/auth/v1/recover"
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(
+            RESET_ENDPOINT,
+            json={"email": user_email},
+            headers=headers
+        )
+
+        if response.status_code == 200:
+            st.success("Password reset email sent.")
             st.session_state.mode = "login"
-        except Exception as e:
-            st.error(f"Reset failed: {e}")
+        else:
+            st.error(f"Error: {response.json().get('msg', 'Could not send reset email.')}")
+
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
 
 
 # --- Main App ---
