@@ -204,18 +204,6 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
     if st.button("Back"):
         st.session_state.mode = "login"
         st.rerun()
-        
-        else:
-            supabase.table("users").insert({
-                "username": new_user,
-                "password": new_pass,
-                "role": "student",
-                "groups": groups
-            }).execute()
-            
-            st.success("Account created! Please log in.")
-            st.session_state.mode = "login"
-            st.rerun()
 
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
     st.title("Reset Your Password")
