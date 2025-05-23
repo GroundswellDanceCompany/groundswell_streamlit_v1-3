@@ -127,8 +127,6 @@ def logout():
     st.session_state.username = ""
     st.session_state.mode = "login"
 
-
-# --- Login System ---
 if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Login")
     username = st.text_input("Username")
