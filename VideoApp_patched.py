@@ -182,8 +182,20 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                 "password": new_pass
             })
             
-            user = supabase.auth.get_user().user
+            # After successful login/signup
+            user = auth_response.user
             user_id = user.id
+            email = user.email
+
+            # Ensure profile exists
+            profile_check = supabase.table("profiles").select("*").eq("id", user_id).execute().data
+            if not profile_check:
+                # Insert default profile if not exists
+                supabase.table("profiles").insert({
+                    "id": user_id,
+                    "role": "student",  # or "admin" if known
+                    "groups": []  # or some default
+                }).execute()
             
             if user:
                 # Insert into profiles if needed
