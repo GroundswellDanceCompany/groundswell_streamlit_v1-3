@@ -171,45 +171,39 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
 # --- Signup Block (Supabase Auth) ---
 elif not st.session_state.logged_in and st.session_state.mode == "signup":
     st.title("Create Student Account")
-
     new_user = st.text_input("Email")
-    new_email = st.text_input("Email")
     new_pass = st.text_input("Password", type="password")
     selected_groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
 
-    if st.button("Sign Up"):
-        if not new_email or not new_pass:
-            st.warning("Please enter both email and password.")
-        else:
-            try:
-                # Sign up the user in Supabase Auth
-                auth_response = supabase.auth.sign_up({
-                    "email": new_email,
-                    "password": new_pass
-                })
+    if st.button("Create"):
+        try:
+            # Sign up using Supabase Auth
+            auth_response = supabase.auth.sign_up({
+                "email": new_user,
+                "password": new_pass
+            })
+            user = auth_response.user
 
-                user = auth_response.user
-                if user:
-    # Then insert into profiles table
-                    supabase.table("profiles").insert({
-                        "id": user.id,                      # This must match auth.uid()
-                        "username": new_user,
-                        "role": "student",                  # Or "admin"
-                        "groups": selected_groups           # This should be defined above
-                    }).execute()
+            if user:
+                # Insert user details into the profiles table
+                supabase.table("profiles").insert({
+                    "id": user.id,
+                    "username": new_user,
+                    "role": "student",
+                    "groups": selected_groups
+                }).execute()
 
-                    st.success("Account created! Please log in.")
-                    st.session_state.mode = "login"
-                    st.rerun()
-                else:
-                    st.error("Signup failed: no user returned.")
+                st.success("Account created successfully. Please log in.")
+                st.session_state.mode = "login"
+                st.rerun()
+            else:
+                st.error("Sign up failed. No user returned.")
+        except Exception as e:
+            st.error(f"Signup failed: {e}")
 
-            except Exception as e:
-                st.error(f"Signup failed: {e}")
-
-        if st.button("Back"):
-            st.session_state.mode = "login"
-            st.rerun()
+    if st.button("Back"):
+        st.session_state.mode = "login"
+        st.rerun()
         
         else:
             supabase.table("users").insert({
@@ -218,6 +212,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                 "role": "student",
                 "groups": groups
             }).execute()
+            
             st.success("Account created! Please log in.")
             st.session_state.mode = "login"
             st.rerun()
