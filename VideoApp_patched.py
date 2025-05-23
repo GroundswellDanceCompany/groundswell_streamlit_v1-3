@@ -127,6 +127,15 @@ def logout():
     st.session_state.username = ""
     st.session_state.mode = "login"
 
+    # After login, check if profile exists
+    profile_exists = supabase.table("profiles").select("id").eq("id", user.id).execute().data
+    if not profile_exists:
+        supabase.table("profiles").insert({
+            "id": user.id,
+            "role": "student",
+            "groups": selected_groups
+        }).execute()
+
 # --- Login System ---
 if not st.session_state.logged_in and st.session_state.mode == "login":
     st.title("Groundswell Login")
