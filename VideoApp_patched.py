@@ -194,7 +194,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
                 supabase.table("profiles").insert({
                     "id": user_id,
                     "role": "student",  # or "admin" if known
-                    "groups": []  # or some default
+                    "groups": selected_groups  # or some default
                 }).execute()
             
                 st.success("Account created!")
