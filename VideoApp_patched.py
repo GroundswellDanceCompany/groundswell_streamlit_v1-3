@@ -54,6 +54,7 @@ else:
 templates = supabase.table("templates") \
     .select("*") \
     .execute().data
+
 if st.session_state.logged_in:
     # Safe to use st.session_state.username here
     streak_rows = supabase.table("streaks") \
@@ -61,13 +62,7 @@ if st.session_state.logged_in:
         .eq("username", st.session_state.username) \
         .execute().data
     user_streaks = {st.session_state.username: streak_rows[0] if streak_rows else {"streak": 0, "last_completion_date": ""}}
-if st.session_state.logged_in:
-    # Safe to use st.session_state.username here
-    badge_rows = supabase.table("badges") \
-        .select("*") \
-        .eq("username", st.session_state.username) \
-        .execute().data
-    user_badges = {st.session_state.username: badge_rows[0]["earned"] if badge_rows else []}
+    
 
 def check_and_award_badges(username, goals, streak_data):
     earned = user_badges.get(username, [])
@@ -233,8 +228,15 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 
 
 # --- Main App ---
+user_badges = {}
+
 elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
     user = st.session_state.get("username")
+    badge_rows = supabase.table("badges") \
+        .select("*") \
+        .eq("username", user) \
+        .execute().data
+    user_badges[user] = badge_rows[0]["earned"] if badge_rows else []
     user_id = st.session_state.get("user_id")
 
     # Fetch current profile data
