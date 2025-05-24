@@ -410,29 +410,34 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
         badges = user_badges.get(user, [])
 
 
-        with tabs[0]:
+        with tabs[0]:  # "My Profile" tab
             st.subheader("My Profile")
 
+            # Display email and role
+            st.markdown(f"**Email:** `{st.session_state.username}`")
+            st.markdown(f"**Role:** `{st.session_state.user_role}`")
+
+            # Fetch current profile info (including name)
+            profile_data = supabase.table("profiles").select("*").eq("id", st.session_state.user_id).execute().data
+            profile = profile_data[0] if profile_data else {}
+
+            current_name = profile.get("username", "")
+            display_name = st.text_input("Your Display Name (seen by teachers)", value=current_name)
+
+            # Update class groups
             st.markdown("### Update Your Class Groups")
-
-            # Safely parse stored groups
-            raw_groups = st.session_state.get("user_groups", [])
-            try:
-                current_groups = ast.literal_eval(raw_groups) if isinstance(raw_groups, str) else raw_groups
-            except Exception:
-                current_groups = []
-
-            # Group selection UI
+            current_groups = st.session_state.get("user_groups", [])
             updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=current_groups)
 
-            # Save updated selection
-            if st.button("Save My Groups"):
+            if st.button("Save My Profile"):
                 try:
                     supabase.table("profiles").update({
+                        "username": display_name,
                         "groups": updated_groups
                     }).eq("id", st.session_state.user_id).execute()
+
                     st.session_state.user_groups = updated_groups
-                    st.success("Groups updated successfully.")
+                    st.success("Profile updated successfully.")
                 except Exception as e:
                     st.error(f"Update failed: {e}")
 
