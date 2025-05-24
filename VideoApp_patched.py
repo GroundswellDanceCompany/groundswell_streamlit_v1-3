@@ -191,15 +191,7 @@ if st.button("Create"):
 
         if user:
             # Optional: Wait briefly for the trigger to insert the row
-            import time
-            time.sleep(1)
-            st.write("Sending groups:", selected_groups)
-
-            # Update the user's profile with role and groups
-            supabase.table("profiles").update({
-                "role": "student",
-                "groups": selected_groups
-            }).eq("id", user.id).execute()
+            
 
             st.success("Account created! Please check your email to verify before logging in.")
             st.session_state.mode = "login"
@@ -243,16 +235,37 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 
 
 # --- Main App ---
-elif st.session_state.get("logged_in"):
+elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
     user = st.session_state.get("username")
     user_id = st.session_state.get("user_id")
 
-    # Fetch user role and groups from profiles table
+    # Fetch current profile data
     profile_resp = supabase.table("profiles").select("*").eq("id", user_id).execute()
     profile = profile_resp.data[0] if profile_resp.data else {}
 
-    st.session_state.user_role = profile.get("role", "student")
-    st.session_state.user_groups = profile.get("groups", [])
+    # Load current groups
+    current_groups = profile.get("groups", [])
+
+    # Prompt student to select classes if not already set
+    if not current_groups:
+        st.info("Select your classes to get personalized goal templates!")
+        updated_groups = st.multiselect("Choose your classes", CLASS_GROUPS)
+
+        if st.button("Save My Classes") and updated_groups:
+            try:
+                supabase.table("profiles").update({
+                    "groups": updated_groups
+                }).eq("id", user_id).execute()
+                st.success("Your class preferences have been saved.")
+                st.session_state.user_groups = updated_groups
+                st.rerun()
+            except Exception as e:
+                st.error(f"Failed to save classes: {e}")
+
+    else:
+        st.session_state.user_groups = current_groups
+
+    # You can now continue with the rest of your tabs/goal logic here
     
     user_info = {
         "profile": {
@@ -261,6 +274,8 @@ elif st.session_state.get("logged_in"):
         "groups": st.session_state.user_groups
         }
     }
+
+    
     is_teacher = st.session_state.get("user_role") == "admin"
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
