@@ -116,10 +116,10 @@ CLASS_GROUPS = [
 ]
 
 BADGE_EMOJIS = {
-    "First Goal Completed": "Ã°ÂÂÂ",
-    "Goal Getter: 5 Goals Done": "Ã¢Â­Â",
-    "Well-Rounded: All Categories": "Ã°ÂÂÂ",
-    "Streak Star: 3-Day Streak": "Ã°ÂÂÂ¥"
+    "First Goal Completed": "🏁",
+    "Goal Getter: 5 Goals Done": "⭐",
+    "Well-Rounded: All Categories": "🌈",
+    "Streak Star: 3-Day Streak": "🔥"
 }
 
 def logout():
@@ -193,6 +193,7 @@ if st.button("Create"):
             # Optional: Wait briefly for the trigger to insert the row
             import time
             time.sleep(1)
+            st.write("Sending groups:", selected_groups)
 
             # Update the user's profile with role and groups
             supabase.table("profiles").update({
