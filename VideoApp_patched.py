@@ -427,7 +427,10 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             # Update class groups
             st.markdown("### Update Your Class Groups")
             current_groups = st.session_state.get("user_groups", [])
-            updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=current_groups)
+            # Sanitize current_groups to avoid invalid defaults
+            valid_groups = [g for g in current_groups if g in CLASS_GROUPS]
+            updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=valid_groups)
+            
 
             if st.button("Save My Profile"):
                 try:
