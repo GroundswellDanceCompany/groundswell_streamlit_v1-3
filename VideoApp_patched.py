@@ -243,30 +243,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
     profile_resp = supabase.table("profiles").select("*").eq("id", user_id).execute()
     profile = profile_resp.data[0] if profile_resp.data else {}
 
-    # Load current groups
-    current_groups = profile.get("groups", [])
-
-    # Prompt student to select classes if not already set
-    if not current_groups:
-        st.info("Select your classes to get personalized goal templates!")
-        updated_groups = st.multiselect("Choose your classes", CLASS_GROUPS)
-
-        if st.button("Save My Classes") and updated_groups:
-            try:
-                supabase.table("profiles").update({
-                    "groups": updated_groups
-                }).eq("id", user_id).execute()
-                st.success("Your class preferences have been saved.")
-                st.session_state.user_groups = updated_groups
-                st.rerun()
-            except Exception as e:
-                st.error(f"Failed to save classes: {e}")
-
-    else:
-        st.session_state.user_groups = current_groups
-
     # You can now continue with the rest of your tabs/goal logic here
-    
     user_info = {
         "profile": {
         "id": st.session_state.get("user_id"),
@@ -405,6 +382,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
         # STUDENT DASHBOARD
         st.title("My Dashboard")
         tabs = st.tabs([
+            "My Profile",
             "About",
             "My Goals",
             "Templates for Me",
@@ -432,6 +410,24 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
         badges = user_badges.get(user, [])
 
         with tabs[0]:
+            st.subheader("My Profile")
+
+            st.markdown("### Update Your Class Groups")
+            current_groups = st.session_state.get("user_groups", [])
+            updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=current_groups)
+
+            if st.button("Save My Groups"):
+                try:
+                    supabase.table("profiles").update({
+                        "groups": updated_groups
+                    }).eq("id", st.session_state.user_id).execute()
+                    st.session_state.user_groups = updated_groups
+                    st.success("Groups updated successfully.")
+                except Exception as e:
+                    st.error(f"Update failed: {e}")
+
+        
+        with tabs[1]:
             st.subheader("About the Groundswell Goal Tracker")
 
             st.markdown("""
@@ -457,7 +453,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             _This platform is built for the Groundswell Dance community, lets grow together._
             """)
 
-        with tabs[1]:
+        with tabs[2]:
             st.subheader("My Active Goals")
             with st.form("add_goal"):
                 g_text = st.text_input("New Goal")
@@ -531,7 +527,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                         st.markdown(f"- **{g['text']}** ({g['category']}) Completed on {g.get('completed_on', 'N/A')}")
 
         
-        with tabs[2]:
+        with tabs[3]:
             st.subheader("Templates for You")
             my_groups = st.session_state.user_groups
 
@@ -563,7 +559,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                                 st.success("Goal added.")
                             # save_json removed (Supabase used)(GOALS_FILE, user_goals)
 
-        with tabs[3]:
+        with tabs[4]:
             st.subheader("Upload Progress Videos")
             for g in goals:
                 with st.expander(f"{g['text']} ({g['category']})"):
@@ -593,7 +589,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                             except Exception as e:
                                 st.error(f"Upload failed: {e}")
 
-        with tabs[4]:
+        with tabs[5]:
             st.subheader("Today's Goals")
             today = datetime.date.today().isoformat()
             todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
@@ -603,7 +599,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                 for g in todays_goals:
                     st.markdown(f"- **{g['text']}** {g['category']}")
 
-        with tabs[5]:
+        with tabs[6]:
             st.subheader("My Progress Overview")
             last_week = datetime.date.today() - datetime.timedelta(days=7)
             completed_goals = [
@@ -627,7 +623,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                 st.caption("No badges yet, keep going!")
                 
         
-        with tabs[6]:
+        with tabs[7]:
             st.subheader("Class Resources from Teacher")
 
             teacher_videos = supabase.table("teacher_videos").select("*").execute().data
@@ -664,7 +660,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                                 st.error(f"Error loading video: {e}")
                     
 
-        with tabs[7]:
+        with tabs[8]:
             st.subheader("Groundswell on YouTube")
 
             st.markdown("""
