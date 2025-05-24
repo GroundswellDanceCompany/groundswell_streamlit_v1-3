@@ -400,6 +400,17 @@ elif st.session_state.get("logged_in"):
             "Youtube"
         ])
 
+        user = st.session_state.username
+
+        # Load user streak data
+        streak_rows = supabase.table("streaks").select("*").eq("username", user).execute().data
+        user_streaks = {
+            user: streak_rows[0] if streak_rows else {
+                "streak": 0,
+                "last_completion_date": ""
+            }
+        }
+
         user_goals = [g for g in all_goals if g["username"] == st.session_state.username]
         goals = user_goals  # already a list of goals for this user
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
@@ -424,11 +435,11 @@ elif st.session_state.get("logged_in"):
             - Building a 3-day streak of goal completion
 
             **Tips:**
-            - Use the Ã¢ÂÂToday's GoalsÃ¢ÂÂ tab to stay focused on deadlines
-            - Check Ã¢ÂÂClass ResourcesÃ¢ÂÂ for helpful videos from your teachers
-            - Be consistent Ã¢ÂÂ small steps lead to big progress!
+            - Use the Today's Goals tab to stay focused on deadlines
+            - Check Class Resources for helpful videos from your teachers
+            - Be consistent small steps lead to big progress!
 
-            _This platform is built for the Groundswell Dance community Ã¢ÂÂ letÃ¢ÂÂs grow together._
+            _This platform is built for the Groundswell Dance community, lets grow together._
             """)
 
         with tabs[1]:
@@ -502,7 +513,7 @@ elif st.session_state.get("logged_in"):
             if done_goals:
                 with st.expander("View Completed Goals"):
                     for g in done_goals:
-                        st.markdown(f"- **{g['text']}** ({g['category']}) Ã¢ÂÂ Completed on {g.get('completed_on', 'N/A')}")
+                        st.markdown(f"- **{g['text']}** ({g['category']}) Completed on {g.get('completed_on', 'N/A')}")
 
         
         with tabs[2]:
@@ -572,10 +583,10 @@ elif st.session_state.get("logged_in"):
             today = datetime.date.today().isoformat()
             todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
             if not todays_goals:
-                st.info("No goals due today Ã¢ÂÂ you're all caught up!")
+                st.info("No goals due today you're all caught up!")
             else:
                 for g in todays_goals:
-                    st.markdown(f"- **{g['text']}** Ã¢ÂÂ {g['category']}")
+                    st.markdown(f"- **{g['text']}** {g['category']}")
 
         with tabs[5]:
             st.subheader("My Progress Overview")
@@ -588,7 +599,7 @@ elif st.session_state.get("logged_in"):
             if completed_goals:
                 st.markdown("### Goals Completed This Week")
                 for g in completed_goals:
-                    st.markdown(f"- **{g['text']}** ({g['category']}) Ã¢ÂÂ completed on {g['completed_on']}")
+                    st.markdown(f"- **{g['text']}** ({g['category']}) completed on {g['completed_on']}")
             else:
                 st.info("No goals completed this week.")
             st.markdown("### Streak Status")
@@ -598,7 +609,7 @@ elif st.session_state.get("logged_in"):
                 for b in badges:
                     st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
             else:
-                st.caption("No badges yet Ã¢ÂÂ keep going!")
+                st.caption("No badges yet, keep going!")
                 
         
         with tabs[6]:
