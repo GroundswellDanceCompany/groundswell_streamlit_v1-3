@@ -409,13 +409,23 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
         badges = user_badges.get(user, [])
 
+
         with tabs[0]:
             st.subheader("My Profile")
 
             st.markdown("### Update Your Class Groups")
-            current_groups = st.session_state.get("user_groups", [])
+
+            # Safely parse stored groups
+            raw_groups = st.session_state.get("user_groups", [])
+            try:
+                current_groups = ast.literal_eval(raw_groups) if isinstance(raw_groups, str) else raw_groups
+            except Exception:
+                current_groups = []
+
+            # Group selection UI
             updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=current_groups)
 
+            # Save updated selection
             if st.button("Save My Groups"):
                 try:
                     supabase.table("profiles").update({
