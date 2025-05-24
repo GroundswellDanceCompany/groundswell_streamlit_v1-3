@@ -230,7 +230,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 # --- Main App ---
 user_badges = {}
 
-elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
+if st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
     user = st.session_state.get("username")
     badge_rows = supabase.table("badges") \
         .select("*") \
