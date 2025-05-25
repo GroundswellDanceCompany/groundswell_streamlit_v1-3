@@ -160,8 +160,9 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 "password": password
             })
             user = auth_response.user
-
-            if user:
+            session = auth_response.session
+            
+            if user and session:
                 st.session_state.logged_in = True
                 st.session_state.username = user.email
                 st.session_state.user_id = user.id
