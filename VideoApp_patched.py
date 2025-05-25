@@ -23,10 +23,11 @@ SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_KEY = st.secrets["supabase"]["key"]
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# Reattach Supabase session if the user is already logged in
 if (
     "access_token" in st.session_state
     and "refresh_token" in st.session_state
-    and "supabase_session_set" not in st.session_state
+    and not st.session_state.get("supabase_session_set", False)
 ):
     supabase.auth.set_session(
         st.session_state.access_token,
