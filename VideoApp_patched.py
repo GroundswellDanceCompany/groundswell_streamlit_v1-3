@@ -188,8 +188,6 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 st.session_state.username = user.email
                 st.session_state.user_id = user.id
 
-                st.rerun()
-
                 # Load profile data
                 profile = supabase.table("profiles").select("*").eq("id", user.id).execute().data
                 if profile:
@@ -198,6 +196,8 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 else:
                     st.session_state.user_role = "student"
                     st.session_state.user_groups = []
+
+                st.rerun()
 
             else:
                 st.error("Invalid login.")
