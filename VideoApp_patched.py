@@ -23,6 +23,17 @@ SUPABASE_URL = st.secrets["supabase"]["url"]
 SUPABASE_KEY = st.secrets["supabase"]["key"]
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+if (
+    "access_token" in st.session_state
+    and "refresh_token" in st.session_state
+    and "supabase_session_set" not in st.session_state
+):
+    supabase.auth.set_session(
+        st.session_state.access_token,
+        st.session_state.refresh_token
+    )
+    st.session_state.supabase_session_set = True
+
 # --- File Paths ---
 #USER_DB_FILE = "user_db# JSON filename removed (Supabase used)"
 GOALS_FILE = "user_goals# JSON filename removed (Supabase used)"
@@ -161,13 +172,22 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
             })
             user = auth_response.user
             session = auth_response.session
-            
+
             if user and session:
+                # Store session for reuse
+                st.session_state.access_token = session.access_token
+                st.session_state.refresh_token = session.refresh_token
+
+                # Attach to client
+                supabase.auth.set_session(session.access_token, session.refresh_token)
+                st.session_state.supabase_session_set = True
+
+                # Track user session
                 st.session_state.logged_in = True
                 st.session_state.username = user.email
                 st.session_state.user_id = user.id
 
-                # Check if profile exists
+                # Load profile data
                 profile = supabase.table("profiles").select("*").eq("id", user.id).execute().data
                 if profile:
                     st.session_state.user_role = profile[0].get("role", "student")
@@ -175,8 +195,10 @@ if not st.session_state.logged_in and st.session_state.mode == "login":
                 else:
                     st.session_state.user_role = "student"
                     st.session_state.user_groups = []
+
             else:
-                st.error("Invalid login credentials.")
+                st.error("Invalid login.")
+
         except Exception as e:
             st.error(f"Login failed: {e}")
             
@@ -454,13 +476,32 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=valid_groups)
             user_role = st.selectbox("Select Your Role", ["student", "teacher", "admin"], index=["student", "teacher", "admin"].index(st.session_state.user_role))
 
+            user_info = supabase.auth.get_user()
+            st.write("Supabase sees this UID:", user_info.user.id if user_info else "None")
+
             if st.button("Save My Profile"):
-                update_user_profile(
-                    user_id=st.session_state.user_id,
-                    display_name=display_name,
-                    groups=updated_groups,
-                    role=user_role
-                )
+                update_data = {
+                    "username": display_name,
+                    "groups": updated_groups,
+                    "role": user_role
+                }
+
+                # Debug output
+                user_info = supabase.auth.get_user()
+                st.write("Supabase sees this UID:", user_info.user.id if user_info else "None")
+                st.write("Preparing to update profile with data:", update_data)
+
+                response = supabase.table("profiles") \
+                    .update(update_data) \
+                    .eq("id", st.session_state.user_id) \
+                    .execute()
+
+                st.write("Update response:", response)
+
+                if response.data:
+                    st.success("Profile updated successfully.")
+                else:
+                    st.warning("Update attempt returned no rows. Check RLS or ID match.")
 
         
         with tabs[1]:
