@@ -32,6 +32,23 @@ BADGES_FILE = "user_badges# JSON filename removed (Supabase used)"
 VIDEO_DIR = "videos"
 CLASS_VIDEO_DIR = "teacher_videos"
 
+def update_user_profile(user_id: str, display_name: str, groups: list, role: str = None):
+    """Update the user's profile in Supabase."""
+    update_data = {
+        "username": display_name,
+        "groups": groups
+    }
+    if role:
+        update_data["role"] = role
+
+    try:
+        supabase.table("profiles").update(update_data).eq("id", user_id).execute()
+        st.session_state.user_groups = groups
+        st.session_state.user_role = role or st.session_state.user_role
+        st.success("Profile updated successfully.")
+    except Exception as e:
+        st.error(f"Update failed: {e}")
+
 # --- Setup ---
 for folder in [VIDEO_DIR, CLASS_VIDEO_DIR]:
     if not os.path.exists(folder):
@@ -429,15 +446,16 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             current_groups = st.session_state.get("user_groups", [])
             # Sanitize current_groups to avoid invalid defaults
             valid_groups = [g for g in current_groups if g in CLASS_GROUPS]
-            updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS)
-            
+            updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=valid_groups)
+            user_role = st.selectbox("Select Your Role", ["student", "teacher", "admin"], index=["student", "teacher", "admin"].index(st.session_state.user_role))
 
             if st.button("Save My Profile"):
-                try:
-                    supabase.table("profiles").update({
-                        "username": display_name,
-                        "groups": updated_groups
-                    }).eq("id", st.session_state.user_id).execute()
+                update_user_profile(
+                    user_id=st.session_state.user_id,
+                    display_name=display_name,
+                    groups=updated_groups,
+                    role=user_role
+                )
 
                     st.session_state.user_groups = updated_groups
                     st.success("Profile updated successfully.")
