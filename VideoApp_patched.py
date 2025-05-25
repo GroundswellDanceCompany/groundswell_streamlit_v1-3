@@ -41,6 +41,10 @@ def update_user_profile(user_id: str, display_name: str, groups: list, role: str
     if role:
         update_data["role"] = role
 
+    st.write("Preparing to update profile with data:")
+    st.write(update_data)
+    st.write("Updating profile for user ID:", user_id)
+
     try:
         supabase.table("profiles").update(update_data).eq("id", user_id).execute()
         st.session_state.user_groups = groups
