@@ -457,11 +457,6 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                     role=user_role
                 )
 
-                st.session_state.user_groups = updated_groups
-                st.success("Profile updated successfully.")
-            except Exception as e:
-                st.error(f"Update failed: {e}")
-
         
         with tabs[1]:
             st.subheader("About the Groundswell Goal Tracker")
