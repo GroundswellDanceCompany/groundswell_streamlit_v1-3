@@ -434,22 +434,33 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                         st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
 
             # Show expired goals
-            
+            expired_goals = [g for g in goals if g.get("expired", False) and not g.get("done", False)]
 
-            for g in expired_goals:
-                st.markdown(f"**{g['text']}** ({g['category']}) — was due {g['target_date']}")
-                snooze_col1, snooze_col2 = st.columns([0.7, 0.3])
-                with snooze_col2:
-                    if st.button("Snooze +3 days", key=f"snooze_{g['id']}"):
-                        new_date = (today + timedelta(days=3)).isoformat()
-                        supabase.table("goals").update({
-                            "target_date": new_date,
-                            "expired": False
-                        }).eq("id", g["id"]).execute()
-                        st.success(f"Goal rescheduled to {new_date}")
-                        st.rerun()
+            if expired_goals:
+                with st.expander("View Expired Goals"):
+                    for g in expired_goals:
+                        st.markdown(f"**{g['text']}** ({g['category']}) — was due {g['target_date']}")
+                        st.caption("This goal has expired.")
 
-        
+                        snooze_col, delete_col = st.columns([0.6, 0.4])
+
+                        with snooze_col:
+                            if st.button("Snooze +3 days", key=f"snooze_{g['id']}"):
+                                from datetime import timedelta
+                                new_date = (datetime.date.today() + timedelta(days=3)).isoformat()
+                                supabase.table("goals").update({
+                                    "target_date": new_date,
+                                    "expired": False
+                                }).eq("id", g["id"]).execute()
+                                st.success(f"Snoozed to {new_date}")
+                                st.rerun()
+
+                        with delete_col:
+                            if st.button("Delete Goal", key=f"delete_{g['id']}"):
+                                supabase.table("goals").delete().eq("id", g["id"]).execute()
+                                st.warning("Goal deleted.")
+                                st.rerun()
+
         
         with tabs[3]:
             st.subheader("Upload Class Resource Videos")
