@@ -555,6 +555,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                             "videos": []
                         }
                         supabase.table("goals").insert(new_goal).execute()
+                        st.rerun()
                     
                     except Exception as e:
                         st.error(f"Insert failed: {e}")
@@ -584,7 +585,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
                         st.progress(progress)
                         st.caption(f"{int(progress * 100)}% complete â due {g['target_date']}")
                     with col2:
-                        if st.checkbox("Done", value=g["done"], key=g["id"]):
+                        if st.checkbox("Done", value=g["done"], key=f"goal_done_{g['id']}"):
                             today = datetime.date.today().isoformat()
                             if not g["done"]:
                                 g["done"] = True
@@ -643,8 +644,9 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             st.subheader("Upload Progress Videos")
             for g in goals:
                 with st.expander(f"{g['text']} ({g['category']})"):
-                    video_label = st.text_input("Label for new video", key=f"label_{g['id']}")
-                    uploaded = st.file_uploader("Select a video", type=["mp4", "mov"], key=f"upload_{g['id']}")
+                    video_label = st.text_input("Label", key=f"label_{g['id']}")
+                    uploaded = st.file_uploader("Video", key=f"upload_{g['id']}")
+
                     if uploaded and video_label:
                         if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
                             video_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
