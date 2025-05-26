@@ -351,34 +351,103 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
 
         
         with tabs[2]:
-            st.subheader("Student Goals + Comments")
+            st.subheader("My Active Goals")
 
-            # Collect unique usernames
-            student_usernames = sorted(list(set([g["username"] for g in all_goals])))
+            from datetime import datetime, date
 
-            selected_student = st.selectbox("Select a student", student_usernames)
-            student_goals = [g for g in all_goals if g["username"] == selected_student]
+            # Fetch all goals for this user
+            goals = supabase.table("goals").select("*") \
+                .eq("username", st.session_state.username).execute().data
 
-            for g in student_goals:
-                st.markdown(f"**{g['text']}** ({g['category']}) â due {g['target_date']}")
+            today = date.today()
 
-                created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]).split("T")[0])
-                target = datetime.date.fromisoformat(g["target_date"].split("T")[0])
-                total_days = (target - created).days or 1
-                elapsed_days = (datetime.date.today() - created).days
-                progress = min(max(elapsed_days / total_days, 0), 1.0)
-                st.progress(progress)
-                st.caption(f"{int(progress * 100)}% complete â due {g['target_date']}")
-
-                comment_key = f"comment_{selected_student}_{g['id']}"
-                new_comment = st.text_input("Comment", value=g.get("comment", ""), key=comment_key)
-
-                if new_comment != g.get("comment", ""):
+            # Auto-expire overdue goals
+            for g in goals:
+                if not g.get("done", False) and not g.get("expired", False):
                     try:
-                        supabase.table("goals").update({"comment": new_comment}).eq("id", g["id"]).execute()
-                        st.success("Comment saved.")
+                        target = datetime.fromisoformat(g["target_date"]).date()
+                        if target < today:
+                            supabase.table("goals").update({"expired": True}) \
+                                .eq("id", g["id"]).execute()
                     except Exception as e:
-                        st.error(f"Failed to save comment: {e}")
+                        st.warning(f"Date error on goal {g['id']}: {e}")
+
+            # Goal creation form
+            with st.form("add_goal"):
+                g_text = st.text_input("New Goal")
+                g_cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
+                g_date = st.date_input("Target Date", today)
+
+                if st.form_submit_button("Add") and g_text:
+                    try:
+                        new_goal = {
+                            "id": str(uuid.uuid4()),
+                            "username": st.session_state.username,
+                            "text": g_text,
+                            "category": g_cat,
+                            "target_date": str(g_date),
+                            "done": False,
+                            "expired": False,
+                            "created_on": str(today),
+                            "videos": []
+                        }
+                        supabase.table("goals").insert(new_goal).execute()
+                        st.success("Goal added successfully!")
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Insert failed: {e}")
+                        st.stop()
+
+            # Show active goals
+            for g in goals:
+                if not g.get("done", False) and not g.get("expired", False):
+                    col1, col2 = st.columns([0.8, 0.2])
+                    with col1:
+                        st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
+                        if "comment" in g:
+                            st.markdown(f"_Teacher Comment:_ {g['comment']}")
+                        created = datetime.fromisoformat(g.get("created_on", g["target_date"])).date()
+                        target = datetime.fromisoformat(g["target_date"]).date()
+                        total_days = (target - created).days or 1
+                        elapsed_days = (today - created).days
+                        progress = min(max(elapsed_days / total_days, 0), 1.0)
+                        st.progress(progress)
+                        st.caption(f"{int(progress * 100)}% complete — due {g['target_date']}")
+
+                    with col2:
+                        if st.checkbox("Done", value=g["done"], key=f"goal_done_{g['id']}"):
+                            if not g["done"]:
+                                g["done"] = True
+                                g["completed_on"] = today.isoformat()
+                                # Optional: update streak logic if used
+                                supabase.table("goals").update({
+                                    "done": True,
+                                    "completed_on": g["completed_on"]
+                                }).eq("id", g["id"]).execute()
+                                st.rerun()
+
+            # Show completed goals
+            done_goals = [g for g in goals if g.get("done")]
+            if done_goals:
+                with st.expander("View Completed Goals"):
+                    for g in done_goals:
+                        st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g.get('completed_on', 'N/A')}")
+
+            # Show expired goals
+            
+
+            for g in expired_goals:
+                st.markdown(f"**{g['text']}** ({g['category']}) — was due {g['target_date']}")
+                snooze_col1, snooze_col2 = st.columns([0.7, 0.3])
+                with snooze_col2:
+                    if st.button("Snooze +3 days", key=f"snooze_{g['id']}"):
+                        new_date = (today + timedelta(days=3)).isoformat()
+                        supabase.table("goals").update({
+                            "target_date": new_date,
+                            "expired": False
+                        }).eq("id", g["id"]).execute()
+                        st.success(f"Goal rescheduled to {new_date}")
+                        st.rerun()
 
         
         
