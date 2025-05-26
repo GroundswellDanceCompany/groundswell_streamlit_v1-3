@@ -671,13 +671,27 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
 
         with tabs[5]:
             st.subheader("Today's Goals")
-            today = datetime.date.today().isoformat()
-            todays_goals = [g for g in goals if g["target_date"] == today and not g["done"]]
-            if not todays_goals:
-                st.info("No goals due today you're all caught up!")
+            from datetime import date
+
+            today = date.today().isoformat()
+
+            todays_goals = supabase.table("goals") \
+                .select("*") \
+                .eq("done", False) \
+                .eq("username", st.session_state.username) \
+                .filter("target_date", "eq", today) \
+                .execute()
+
+            if todays_goals.data:
+                for goal in todays_goals.data:
+                    st.markdown(f"**{goal['text']}** ({goal['category']})")
+                    st.markdown(f"*Due:* {goal['target_date']}")
+                    if st.checkbox("Done", key=goal['id']):
+                        supabase.table("goals").update({"done": True, "completed_on": today}) \
+                            .eq("id", goal["id"]).execute()
+                        st.rerun()
             else:
-                for g in todays_goals:
-                    st.markdown(f"- **{g['text']}** {g['category']}")
+                st.success("No goals due today!")
 
         with tabs[6]:
             st.subheader("My Progress Overview")
