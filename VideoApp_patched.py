@@ -781,7 +781,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             completed_goals = [
                 g for g in goals
                 if g.get("done") and g.get("completed_on") and
-                datetime.date.fromisoformat(g["completed_on"]) >= last_week
+                datetime.datetime.fromisoformat(g["completed_on"])
             ]
             if completed_goals:
                 st.markdown("### Goals Completed This Week")
