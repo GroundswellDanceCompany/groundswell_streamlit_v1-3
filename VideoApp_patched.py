@@ -275,6 +275,27 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 
 
 # --- Main App ---
+if st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
+        user = st.session_state.get("username")
+        badge_rows = supabase.table("badges") \
+            .select("*") \
+            .eq("username", user) \
+            .execute().data
+        user_badges[user] = badge_rows[0]["earned"] if badge_rows else []
+        user_id = st.session_state.get("user_id")
+
+        # Fetch current profile data
+        profile_resp = supabase.table("profiles").select("*").eq("id", user_id).execute()
+        profile = profile_resp.data[0] if profile_resp.data else {}
+
+        # You can now continue with the rest of your tabs/goal logic here
+        user_info = {
+            "profile": {
+            "id": st.session_state.get("user_id"),
+            "role": st.session_state.get("user_role", "student"),  # default to student
+            "groups": st.session_state.user_groups
+            }
+        }
 
 elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "teacher":
     st.sidebar.title(f"Welcome, Teacher {st.session_state.username}")
