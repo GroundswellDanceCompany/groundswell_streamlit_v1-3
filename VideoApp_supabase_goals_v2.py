@@ -221,6 +221,7 @@ elif st.session_state.logged_in:
     "id": st.session_state.get("user_id"),
     "role": st.session_state.get("user_role", "student"),  # default to student
     "groups": st.session_state.user_groups
+    }
 }
     is_teacher = user_info["role"] == "admin"
     st.sidebar.title(f"Hello, {user}")
