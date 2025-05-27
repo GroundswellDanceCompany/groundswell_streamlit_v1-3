@@ -299,7 +299,7 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
         }
     }
     
-    is_teacher = st.session_state.get("user_role") == "admin"
+    is_teacher = st.session_state.get("user_role") == "teacher"
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
 
