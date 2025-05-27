@@ -277,18 +277,8 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 # --- Main App ---
 if st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
         user = st.session_state.get("username")
-        badge_rows = supabase.table("badges") \
-            .select("*") \
-            .eq("username", user) \
-            .execute().data
-        user_badges[user] = badge_rows[0]["earned"] if badge_rows else []
         user_id = st.session_state.get("user_id")
 
-        # Fetch current profile data
-        profile_resp = supabase.table("profiles").select("*").eq("id", user_id).execute()
-        profile = profile_resp.data[0] if profile_resp.data else {}
-
-        # You can now continue with the rest of your tabs/goal logic here
         user_info = {
             "profile": {
             "id": st.session_state.get("user_id"),
@@ -297,16 +287,6 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             }
         }
 
-elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "teacher":
-    st.sidebar.title(f"Welcome, Teacher {st.session_state.username}")
-    st.sidebar.button("Logout", on_click=logout)
-
-    st.title("Teacher Dashboard")
-    st.write("This is where teacher tools and templates will go.")
-    
-    is_teacher = st.session_state.get("user_role") == "teacher"
-    st.sidebar.title(f"Hello, {user}")
-    st.sidebar.button("Logout", on_click=logout)
 
     if is_teacher:
         # TEACHER DASHBOARD
