@@ -523,7 +523,8 @@ if st.session_state.get("logged_in"):
         with tabs[2]:
             st.subheader("My Active Goals")
 
-            from datetime import datetime, date
+            import datetime
+            from datetime import timedelta
 
             # Fetch all goals for this user
             goals = supabase.table("goals").select("*") \
