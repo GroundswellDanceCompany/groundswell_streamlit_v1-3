@@ -278,7 +278,6 @@ if st.session_state.get("logged_in"):
 
             for g in student_goals:
                 st.markdown(f"**{g['text']}** ({g['category']}) — due {g['target_date']}")
-
                 created = datetime.date.fromisoformat(g.get("created_on", g["target_date"]).split("T")[0])
                 target = datetime.date.fromisoformat(g["target_date"].split("T")[0])
                 total_days = (target - created).days or 1
