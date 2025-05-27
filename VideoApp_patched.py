@@ -647,7 +647,7 @@ if st.session_state.get("logged_in"):
                 for t in my_templates:
                     with st.expander(f"{t['text']} ({t['category']})"):
                         with st.form(f"form_{t['id']}"):
-                            goal_date = st.date_input("Target Date", datetime.date.today())
+                            goal_date = st.date_input("Target Date", date.today())
                             submitted = st.form_submit_button("Add to My Goals")
                             if submitted:
                                 new_goal = {
