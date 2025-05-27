@@ -298,7 +298,15 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
         "groups": st.session_state.user_groups
         }
     }
+elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "teacher":
+    st.sidebar.title(f"Welcome Teacher, {st.session_state.username}")
+    st.sidebar.button("Logout", on_click=logout)
 
+    st.title("Teacher Dashboard")
+
+    # Example: Load students, templates, etc.
+    st.write("This is where your teacher-specific tools will go.")
+    st.write("You can assign templates, view student goals, etc.")
     
     is_teacher = st.session_state.get("user_role") == "admin"
     st.sidebar.title(f"Hello, {user}")
