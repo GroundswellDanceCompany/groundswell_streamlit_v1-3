@@ -286,9 +286,9 @@ if st.session_state.get("logged_in") and st.session_state.get("user_role") == "s
             "groups": st.session_state.user_groups
             }
         }
-            is_teacher = user_info["role"] == "admin"
-            st.sidebar.title(f"Hello, {user}")
-            st.sidebar.button("Logout", on_click=logout)
+        is_teacher = user_info["role"] == "teacher"
+        st.sidebar.title(f"Hello, {user}")
+        st.sidebar.button("Logout", on_click=logout)
 
 
     if is_teacher:
