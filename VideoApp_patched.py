@@ -427,9 +427,8 @@ if st.session_state.get("logged_in"):
         user_goals = [g for g in all_goals if g["username"] == st.session_state.username]
         goals = user_goals  # already a list of goals for this user
         streak = user_streaks.get(user, {"streak": 0, "last_completion_date": ""})
-        badges = user_badges.get(user, [])
-
         user_badges = {}
+        badges = user_badges.get(user, [])
 
         badge_rows = supabase.table("badges") \
             .select("*") \
