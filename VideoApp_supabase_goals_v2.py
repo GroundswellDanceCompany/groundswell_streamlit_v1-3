@@ -214,21 +214,15 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         st.rerun()
 
 # --- Main App ---
-elif st.session_state.logged_in:
-    user = st.session_state.username
-    user_info = {
-    "profile": {
-    "id": st.session_state.get("user_id"),
-    "role": st.session_state.get("user_role", "student"),  # default to student
-    "groups": st.session_state.user_groups
-    }
-}
-    is_teacher = user_info["role"] == "admin"
+if st.session_state.get("logged_in"):
+    user = st.session_state.get("username")
+    role = st.session_state.get("user_role")
+
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
 
-    if is_teacher:
-        # TEACHER DASHBOARD
+    if role in ["teacher", "admin"]:
+        # Show teacher view
         st.title("Teacher Dashboard")
 
         tabs = st.tabs([
