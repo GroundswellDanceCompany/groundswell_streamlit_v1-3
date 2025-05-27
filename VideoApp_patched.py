@@ -530,7 +530,7 @@ if st.session_state.get("logged_in"):
             goals = supabase.table("goals").select("*") \
                 .eq("username", st.session_state.username).execute().data
 
-            today = date.today()
+            today = datetime.date.today()
 
             # Auto-expire overdue goals
             for g in goals:
