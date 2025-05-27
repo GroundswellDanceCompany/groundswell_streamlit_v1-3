@@ -721,7 +721,13 @@ if st.session_state.get("logged_in"):
 
         with tabs[6]:
             st.subheader("My Progress Overview")
-            last_week = datetime.date.today() - datetime.timedelta(days=7)
+
+            import datetime
+            from datetime import timedelta
+
+            today = datetime.date.today()
+            last_week = today - timedelta(days=7)
+            
             completed_goals = [
                 g for g in goals
                 if g.get("done") and g.get("completed_on") and
