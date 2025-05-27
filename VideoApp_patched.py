@@ -398,7 +398,7 @@ if st.session_state.get("logged_in"):
 
 # Student dashboard goes here...
 
-    else:
+    elif role == "student":
         # STUDENT DASHBOARD
         st.title("My Dashboard")
         tabs = st.tabs([
