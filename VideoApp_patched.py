@@ -275,20 +275,19 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
 
 
 # --- Main App ---
-if st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
-        user = st.session_state.get("username")
-        user_id = st.session_state.get("user_id")
-
-        user_info = {
-            "profile": {
-            "id": st.session_state.get("user_id"),
-            "role": st.session_state.get("user_role", "student"),  # default to student
-            "groups": st.session_state.user_groups
-            }
-        }
-        is_teacher = user_info["role"] == "teacher"
-        st.sidebar.title(f"Hello, {user}")
-        st.sidebar.button("Logout", on_click=logout)
+elif st.session_state.get("logged_in") and st.session_state.get("user_role") == "student":
+    user = st.session_state.get("username")
+    user_id = st.session_state.get("user_id")
+    user_info = {
+    "profile": {
+    "id": st.session_state.get("user_id"),
+    "role": st.session_state.get("user_role", "student"),  # default to student
+    "groups": st.session_state.user_groups
+}
+        
+    is_teacher = user_info["role"] == "teacher"
+    st.sidebar.title(f"Hello, {user}")
+    st.sidebar.button("Logout", on_click=logout)
 
 
     if is_teacher:
