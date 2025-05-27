@@ -635,7 +635,8 @@ if st.session_state.get("logged_in"):
         with tabs[3]:
             st.subheader("Templates for You")
             my_groups = st.session_state.user_groups
-            today = datetime.date.today()
+
+            import datetime
 
             my_templates = [
                 t for t in templates
