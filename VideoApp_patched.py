@@ -666,6 +666,11 @@ if st.session_state.get("logged_in"):
         with tabs[4]:
             st.subheader("Upload Progress Videos")
 
+            st.write("User:", st.session_state.get("username"))
+            st.write("User ID:", st.session_state.get("user_id"))
+            st.write("Access token present:", "access_token" in st.session_state)
+            st.write("Storage session set:", st.session_state.get("supabase_session_set", False))
+
             import uuid
             from datetime import datetime, date, timedelta
 
