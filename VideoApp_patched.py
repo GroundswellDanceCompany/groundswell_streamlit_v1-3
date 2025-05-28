@@ -710,7 +710,7 @@ if st.session_state.get("logged_in"):
                         try:
                             # Construct video path
                             video_filename = f"{selected_goal_id}_{uuid.uuid4().hex}_{uploaded.name}"
-                            video_path = f"{st.session_state.username}/{video_filename}"
+                            video_path = f"{st.session_state.user_id}/{video_filename}"
 
                             # Upload to Supabase Storage
                             response = supabase.storage.from_("studentvideos").upload(
