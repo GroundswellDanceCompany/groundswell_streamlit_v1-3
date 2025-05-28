@@ -713,7 +713,7 @@ if st.session_state.get("logged_in"):
 
             for g in all_goals:
                 try:
-                    target = datetime.datetime.fromisoformat(g["target_date"]).date()
+                    target = datetime.fromisoformat(g["target_date"]).date()
                     if not g.get("done", False):
                         if target == today:
                             todays_goals.append(g)
