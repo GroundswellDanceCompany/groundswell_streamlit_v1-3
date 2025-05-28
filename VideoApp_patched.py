@@ -666,7 +666,22 @@ if st.session_state.get("logged_in"):
         with tabs[4]:
             st.subheader("Upload Progress Videos")
 
-            # Get current goals for the logged-in user
+            import uuid
+            from datetime import datetime, date, timedelta
+
+            # Reattach session (needed for authenticated uploads)
+            if (
+                "access_token" in st.session_state
+                and "refresh_token" in st.session_state
+                and not st.session_state.get("supabase_session_set", False)
+            ):
+                supabase.auth.set_session(
+                    st.session_state.access_token,
+                    st.session_state.refresh_token
+                )
+                st.session_state.supabase_session_set = True
+
+            # Fetch user's active goals
             goals = supabase.table("goals") \
                 .select("id, text, category") \
                 .eq("username", st.session_state.username) \
@@ -676,38 +691,45 @@ if st.session_state.get("logged_in"):
             if not goals:
                 st.info("You don't have any active goals yet.")
             else:
-                # Map for dropdown: "Goal Text (Category)" ➝ goal_id
+                # Dropdown: user selects a goal
                 goal_options = {f"{g['text']} ({g['category']})": g['id'] for g in goals}
                 selected_label = st.selectbox("Select Goal", list(goal_options.keys()))
                 selected_goal_id = goal_options[selected_label]
 
+                # Upload form
                 video_label = st.text_input("Label for Video")
                 uploaded = st.file_uploader("Upload Video", type=["mp4", "mov", "webm"])
 
                 if uploaded and video_label:
                     if st.button("Upload"):
                         try:
-                            import uuid
-                            from datetime import datetime
-
+                            # Construct video path
                             video_filename = f"{selected_goal_id}_{uuid.uuid4().hex}_{uploaded.name}"
                             video_path = f"{st.session_state.username}/{video_filename}"
 
-                            # Upload video to Supabase Storage
-                            supabase.storage.from_("studentvideos").upload(
+                            # Upload to Supabase Storage
+                            response = supabase.storage.from_("studentvideos").upload(
                                 path=video_path,
                                 file=uploaded.getvalue(),
                                 file_options={"content-type": uploaded.type}
                             )
 
-                            # Insert video metadata into `videos` table
-                            supabase.table("videos").insert({
+                            # Log storage upload result
+                            st.write("Storage upload result:", response)
+
+                            # Insert metadata into videos table
+                            insert_data = {
                                 "goal_id": selected_goal_id,
                                 "username": st.session_state.username,
                                 "label": video_label,
                                 "filename": video_path,
                                 "uploaded": datetime.now().isoformat()
-                            }).execute()
+                            }
+
+                            # Debug: log insert data
+                            st.write("Inserting with:", insert_data)
+
+                            supabase.table("videos").insert(insert_data).execute()
 
                             st.success(f"Video '{video_label}' uploaded and linked to your goal.")
                             st.rerun()
