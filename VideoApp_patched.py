@@ -522,15 +522,14 @@ if st.session_state.get("logged_in"):
 
         with tabs[2]:
             st.subheader("My Active Goals")
-
-            import datetime
-            from datetime import timedelta
+            
 
             # Fetch all goals for this user
             goals = supabase.table("goals").select("*") \
                 .eq("username", st.session_state.username).execute().data
 
             today = datetime.date.today()
+            new_date = today + datetime.timedelta(days=3)
 
             # Auto-expire overdue goals
             for g in goals:
@@ -577,8 +576,8 @@ if st.session_state.get("logged_in"):
                         st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
                         if "comment" in g:
                             st.markdown(f"_Teacher Comment:_ {g['comment']}")
-                        created = datetime.fromisoformat(g.get("created_on", g["target_date"])).date()
-                        target = datetime.fromisoformat(g["target_date"]).date()
+                        created = datetime.datetime.fromisoformat(g.get("created_on", g["target_date"])).date()
+                        target = datetime.datetime.fromisoformat(g["target_date"]).date()
                         total_days = (target - created).days or 1
                         elapsed_days = (today - created).days
                         progress = min(max(elapsed_days / total_days, 0), 1.0)
@@ -617,8 +616,7 @@ if st.session_state.get("logged_in"):
 
                         with snooze_col:
                             if st.button("Snooze +3 days", key=f"snooze_{g['id']}"):
-                                from datetime import timedelta
-                                new_date = (datetime.date.today() + timedelta(days=3)).isoformat()
+                                new_date = (datetime.date.today() + datetime.timedelta(days=3)).isoformat()
                                 supabase.table("goals").update({
                                     "target_date": new_date,
                                     "expired": False
@@ -636,8 +634,6 @@ if st.session_state.get("logged_in"):
         with tabs[3]:
             st.subheader("Templates for You")
             my_groups = st.session_state.user_groups
-
-            import datetime
 
             my_templates = [
                 t for t in templates
@@ -700,56 +696,116 @@ if st.session_state.get("logged_in"):
 
         with tabs[5]:
             st.subheader("Today's Goals")
-            from datetime import date
 
-            today = date.today().isoformat()
+            today = datetime.date.today()
+            today_iso = today.isoformat()
 
-            todays_goals = supabase.table("goals") \
+            # Fetch all goals for the user
+            all_goals_resp = supabase.table("goals") \
                 .select("*") \
-                .eq("done", False) \
                 .eq("username", st.session_state.username) \
-                .filter("target_date", "eq", today) \
                 .execute()
+            all_goals = all_goals_resp.data if all_goals_resp else []
 
-            if todays_goals.data:
-                for goal in todays_goals.data:
-                    st.markdown(f"**{goal['text']}** ({goal['category']})")
-                    st.markdown(f"*Due:* {goal['target_date']}")
-                    if st.checkbox("Done", key=goal['id']):
-                        supabase.table("goals").update({"done": True, "completed_on": today}) \
-                            .eq("id", goal["id"]).execute()
+            # Separate goals
+            todays_goals = []
+            expired_goals = []
+
+            for g in all_goals:
+                try:
+                    target = datetime.datetime.fromisoformat(g["target_date"]).date()
+                    if not g.get("done", False):
+                        if target == today:
+                            todays_goals.append(g)
+                        elif target < today and not g.get("expired", False):
+                            expired_goals.append(g)
+                except Exception as e:
+                    st.warning(f"Date error on goal {g['id']}: {e}")
+
+            # --- Show today's goals ---
+            if todays_goals:
+                st.subheader("Due Today")
+                for goal in todays_goals:
+                    st.markdown(f"**{goal['text']}** ({goal['category']}) — *Due:* {goal['target_date']}")
+                    if st.checkbox("Done", key=f"today_goal_done_{goal['id']}"):
+                        supabase.table("goals").update({
+                            "done": True,
+                            "completed_on": today_iso
+                        }).eq("id", goal["id"]).execute()
+                        st.success(f"Marked as done: {goal['text']}")
                         st.rerun()
             else:
-                st.success("No goals due today!")
+                st.info("You have no goals due today!")
+
+            # --- Show expired goals ---
+            if expired_goals:
+                st.subheader("⚠️ Expired Goals")
+                for g in expired_goals:
+                    st.markdown(f"**{g['text']}** ({g['category']}) — was due {g['target_date']}")
+
+            # --- Award badge if all today's goals are done ---
+            if todays_goals and all(g.get("done") for g in todays_goals):
+                st.success("🎉 All today's goals completed! Great job!")
+                check_and_award_badges(
+                    st.session_state.username,
+                    all_goals,
+                    user_streaks.get(st.session_state.username, {})
+                )
 
         with tabs[6]:
             st.subheader("My Progress Overview")
 
-            import datetime
-            from datetime import timedelta
-
             today = datetime.date.today()
-            last_week = today - timedelta(days=7)
-            
-            completed_goals = [
-                g for g in goals
-                if g.get("done") and g.get("completed_on") and
-                datetime.datetime.fromisoformat(g["completed_on"])
+            last_week = today - datetime.timedelta(days=7)
+
+            # Safely get user's data
+            goals = all_goals if "all_goals" in locals() else []
+            streak = user_streaks.get(st.session_state.username, {"streak": 0, "longest_streak": 0})
+            badges = user_badges.get(st.session_state.username, [])
+
+            # Filter completed goals
+            completed_goals = [g for g in goals if g.get("done") and g.get("completed_on")]
+            weekly_goals = [
+                g for g in completed_goals
+                if datetime.datetime.fromisoformat(g["completed_on"]).date() >= last_week
             ]
-            if completed_goals:
-                st.markdown("### Goals Completed This Week")
-                for g in completed_goals:
-                    st.markdown(f"- **{g['text']}** ({g['category']}) completed on {g['completed_on']}")
+
+            # --- Weekly completions ---
+            if weekly_goals:
+                st.markdown("### ✅ Goals Completed This Week")
+                for g in weekly_goals:
+                    st.markdown(f"- **{g['text']}** ({g['category']}) — Completed on {g['completed_on']}")
             else:
                 st.info("No goals completed this week.")
-            st.markdown("### Streak Status")
-            st.markdown(f"**Current Streak:** {streak['streak']} day(s)")
-            st.markdown("### Badges Earned")
+
+            # --- Summary stats ---
+            st.markdown("### 📊 Goal Summary")
+            st.markdown(f"**Total Goals Completed:** {len(completed_goals)}")
+            st.markdown(f"**Goals Completed This Week:** {len(weekly_goals)}")
+
+            # --- Category breakdown ---
+            if completed_goals:
+                st.markdown("### 📚 Breakdown by Category")
+                category_counts = {}
+                for g in completed_goals:
+                    cat = g.get("category", "Uncategorized")
+                    category_counts[cat] = category_counts.get(cat, 0) + 1
+
+                for cat, count in category_counts.items():
+                    st.markdown(f"- **{cat}:** {count} goal(s)")
+
+            # --- Streak display ---
+            st.markdown("### 🔁 Streaks")
+            st.markdown(f"**Current Streak:** {streak.get('streak', 0)} day(s)")
+            st.markdown(f"**Longest Streak:** {streak.get('longest_streak', streak.get('streak', 0))} day(s)")
+
+            # --- Badges ---
+            st.markdown("### 🏅 Badges Earned")
             if badges:
                 for b in badges:
                     st.markdown(f"{BADGE_EMOJIS.get(b, '')} {b}")
             else:
-                st.caption("No badges yet, keep going!")
+                st.caption("No badges yet — keep going!")
                 
         
         with tabs[7]:
