@@ -656,7 +656,7 @@ if st.session_state.get("logged_in"):
                                     "category": t["category"],
                                     "target_date": str(goal_date),
                                     "done": False,
-                                    "created_on": str(datetime.date.today()),
+                                    "created_on": str(date.today()),
                                     "videos": []
                                 }
                                 supabase.table("goals").insert(new_goal).execute()
