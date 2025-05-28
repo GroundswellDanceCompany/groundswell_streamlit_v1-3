@@ -665,34 +665,55 @@ if st.session_state.get("logged_in"):
 
         with tabs[4]:
             st.subheader("Upload Progress Videos")
-            for g in goals:
-                with st.expander(f"{g['text']} ({g['category']})"):
-                    video_label = st.text_input("Label", key=f"label_{g['id']}")
-                    uploaded = st.file_uploader("Video", key=f"upload_{g['id']}")
 
-                    if uploaded and video_label:
-                        if st.button("Upload Video", key=f"submit_upload_{g['id']}"):
-                            video_filename = f"{g['id']}_{uuid.uuid4().hex}_{uploaded.name}"
+            # Get current goals for the logged-in user
+            goals = supabase.table("goals") \
+                .select("id, text, category") \
+                .eq("username", st.session_state.username) \
+                .eq("done", False) \
+                .execute().data
+
+            if not goals:
+                st.info("You don't have any active goals yet.")
+            else:
+                # Map for dropdown: "Goal Text (Category)" ➝ goal_id
+                goal_options = {f"{g['text']} ({g['category']})": g['id'] for g in goals}
+                selected_label = st.selectbox("Select Goal", list(goal_options.keys()))
+                selected_goal_id = goal_options[selected_label]
+
+                video_label = st.text_input("Label for Video")
+                uploaded = st.file_uploader("Upload Video", type=["mp4", "mov", "webm"])
+
+                if uploaded and video_label:
+                    if st.button("Upload"):
+                        try:
+                            import uuid
+                            from datetime import datetime
+
+                            video_filename = f"{selected_goal_id}_{uuid.uuid4().hex}_{uploaded.name}"
                             video_path = f"{st.session_state.username}/{video_filename}"
 
-                            try:
-                                supabase.storage.from_("studentvideos").upload(
-                                    path=video_path,
-                                    file=uploaded.getvalue(),
-                                    file_options={"content-type": uploaded.type}
-                                )
+                            # Upload video to Supabase Storage
+                            supabase.storage.from_("studentvideos").upload(
+                                path=video_path,
+                                file=uploaded.getvalue(),
+                                file_options={"content-type": uploaded.type}
+                            )
 
-                                g.setdefault("videos", []).append({
-                                    "filename": video_path,
-                                    "label": video_label,
-                                    "uploaded": str(datetime.datetime.now())
-                                })
+                            # Insert video metadata into `videos` table
+                            supabase.table("videos").insert({
+                                "goal_id": selected_goal_id,
+                                "username": st.session_state.username,
+                                "label": video_label,
+                                "filename": video_path,
+                                "uploaded": datetime.now().isoformat()
+                            }).execute()
 
-                                supabase.table("goals").update({"videos": g["videos"]}).eq("id", g["id"]).execute()
-                                st.success(f"Video '{video_label}' uploaded.")
-                                st.rerun()
-                            except Exception as e:
-                                st.error(f"Upload failed: {e}")
+                            st.success(f"Video '{video_label}' uploaded and linked to your goal.")
+                            st.rerun()
+
+                        except Exception as e:
+                            st.error(f"Upload failed: {e}")
 
         with tabs[5]:
             st.subheader("Today's Goals")
