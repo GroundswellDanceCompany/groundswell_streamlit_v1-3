@@ -528,8 +528,8 @@ if st.session_state.get("logged_in"):
             goals = supabase.table("goals").select("*") \
                 .eq("username", st.session_state.username).execute().data
 
-            today = datetime.date.today()
-            new_date = today + datetime.timedelta(days=3)
+            today = date.today()
+            new_date = timedelta(days=3)
 
             # Auto-expire overdue goals
             for g in goals:
@@ -576,8 +576,8 @@ if st.session_state.get("logged_in"):
                         st.markdown(f"**{g['text']}** — {g['category']} (due {g['target_date']})")
                         if "comment" in g:
                             st.markdown(f"_Teacher Comment:_ {g['comment']}")
-                        created = datetime.datetime.fromisoformat(g.get("created_on", g["target_date"])).date()
-                        target = datetime.datetime.fromisoformat(g["target_date"]).date()
+                        created = datetime.fromisoformat(g.get("created_on", g["target_date"])).date()
+                        target = datetime.fromisoformat(g["target_date"]).date()
                         total_days = (target - created).days or 1
                         elapsed_days = (today - created).days
                         progress = min(max(elapsed_days / total_days, 0), 1.0)
@@ -616,7 +616,7 @@ if st.session_state.get("logged_in"):
 
                         with snooze_col:
                             if st.button("Snooze +3 days", key=f"snooze_{g['id']}"):
-                                new_date = (datetime.date.today() + datetime.timedelta(days=3)).isoformat()
+                                new_date = (date.today() + timedelta(days=3)).isoformat()
                                 supabase.table("goals").update({
                                     "target_date": new_date,
                                     "expired": False
@@ -697,7 +697,7 @@ if st.session_state.get("logged_in"):
         with tabs[5]:
             st.subheader("Today's Goals")
 
-            today = datetime.date.today()
+            today = date.today()
             today_iso = today.isoformat()
 
             # Fetch all goals for the user
@@ -755,8 +755,8 @@ if st.session_state.get("logged_in"):
         with tabs[6]:
             st.subheader("My Progress Overview")
 
-            today = datetime.date.today()
-            last_week = today - datetime.timedelta(days=7)
+            today = date.today()
+            last_week = today - timedelta(days=7)
 
             # Safely get user's data
             goals = all_goals if "all_goals" in locals() else []
@@ -767,7 +767,7 @@ if st.session_state.get("logged_in"):
             completed_goals = [g for g in goals if g.get("done") and g.get("completed_on")]
             weekly_goals = [
                 g for g in completed_goals
-                if datetime.datetime.fromisoformat(g["completed_on"]).date() >= last_week
+                if datetime.fromisoformat(g["completed_on"]).date() >= last_week
             ]
 
             # --- Weekly completions ---
