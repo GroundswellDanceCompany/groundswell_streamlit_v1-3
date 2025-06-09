@@ -219,28 +219,34 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
     st.title("Create Student Account")
     new_user = st.text_input("Email")
     new_pass = st.text_input("Password", type="password")
-    
 
-if st.button("Create"):
-    try:
-        # Supabase Auth sign up
-        auth_response = supabase.auth.sign_up({
-            "email": new_user,
-            "password": new_pass
-        })
+    if st.button("Create"):
+        try:
+            # Step 1: Sign up user with Supabase Auth
+            auth_response = supabase.auth.sign_up({
+                "email": new_user,
+                "password": new_pass
+            })
+            user = auth_response.user
 
-        user = auth_response.user
+            if user:
+                # Step 2: Insert user profile into 'profiles' table
+                supabase.table("profiles").insert({
+                    "id": user.id,
+                    "username": new_user,
+                    "groups": [],
+                    "role": "student"
+                }).execute()
 
-        if user:
-            # Optional: Wait briefly for the trigger to insert the row
-            st.success("Account created! Please check your email to verify before logging in.")
-            st.session_state.mode = "login"
-            st.rerun()
-        else:
-            st.error("Signup failed. No user returned.")
-    except Exception as e:
-        st.error(f"Signup failed: {e}")
-        
+                st.success("Account created! Please check your email to verify before logging in.")
+                st.session_state.mode = "login"
+                st.rerun()
+            else:
+                st.error("Signup failed. No user returned.")
+
+        except Exception as e:
+            st.error(f"Signup failed: {e}")
+
     if st.button("Back"):
         st.session_state.mode = "login"
         st.rerun()
