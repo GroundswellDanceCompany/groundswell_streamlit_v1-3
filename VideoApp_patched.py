@@ -273,7 +273,43 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
         st.session_state.mode = "login"
         st.rerun()
 
+st.subheader("Welcome to the Dashboard")
 
+# Check user identity
+user_id = st.session_state.get("user_id")
+if not user_id:
+    st.error("Not logged in.")
+    st.stop()
+
+# Fetch role from profiles table
+profile_data = supabase.table("profiles").select("role").eq("id", user_id).execute().data
+if not profile_data:
+    st.error("No profile found.")
+    st.stop()
+
+role = profile_data[0]["role"]
+
+# Show views
+if role in ["teacher", "admin"]:
+    st.success("You are logged in as a teacher.")
+    st.markdown("### 📚 Teacher View")
+    # Test teacher-only data access
+    try:
+        templates = supabase.table("templates").select("*").execute().data
+        st.write("Templates Available:", templates)
+    except Exception as e:
+        st.error(f"Access denied: {e}")
+
+else:
+    st.success("You are logged in as a student.")
+    st.markdown("### 🏆 Student View")
+    # Test student-only data access
+    try:
+        goals = supabase.table("goals").select("*").eq("username", st.session_state.username).execute().data
+        st.write("Your Goals:", goals)
+    except Exception as e:
+        st.error(f"Access denied: {e}")
+        
 # --- Main App ---
 if st.session_state.get("logged_in"):
     user = st.session_state.get("username")
