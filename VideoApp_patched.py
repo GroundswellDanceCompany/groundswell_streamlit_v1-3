@@ -250,7 +250,7 @@ elif not st.session_state.logged_in and st.session_state.mode == "signup":
     if st.button("Back"):
         st.session_state.mode = "login"
         st.rerun()
-
+        
 elif not st.session_state.logged_in and st.session_state.mode == "reset":
     st.title("Reset Password")
 
@@ -273,7 +273,10 @@ elif not st.session_state.logged_in and st.session_state.mode == "reset":
             st.success("Password reset email sent.")
             st.session_state.mode = "login"
         else:
-            st.error(f"Error: {response.json().get('msg', 'Could not send reset email.')}")
+            # Safely extract message
+            error_msg = response.json().get("msg", "Could not send reset email.")
+            # Use st.text to avoid Markdown issues
+            st.text(f"Error: {error_msg}")
 
     if st.button("Back"):
         st.session_state.mode = "login"
