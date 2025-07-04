@@ -324,14 +324,17 @@ if st.session_state.get("logged_in"):
     st.sidebar.title(f"Hello, {user}")
     st.sidebar.button("Logout", on_click=logout)
 
-    if role in ["teacher", "admin"]:
-        
+    if role == "admin":
+        st.success("You are logged in as a teacher.")
+        st.title("📚 Teacher Dashboard")
 
         tabs = st.tabs([
             "Create Templates",
             "All Templates",
             "Student Goals + Comments",
-            "Class Resources" ])
+            "Class Resources",
+            "My Profile"
+        ])
 
         with tabs[0]:
             st.subheader("Create Goal Template")
