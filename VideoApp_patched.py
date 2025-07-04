@@ -333,24 +333,42 @@ if st.session_state.get("logged_in"):
             "Student Goals + Comments",
             "Class Resources" ])
 
-        with tabs[0]:
-            st.subheader("Create Goal Template")
-            with st.form("template_form"):
-                text = st.text_input("Goal Text")
-                cat = st.selectbox("Category", ["Technique", "Strength", "Flexibility", "Performance"])
-                assign = st.multiselect("Assign to Groups", CLASS_GROUPS)
-                if st.form_submit_button("Add") and text:
-                    try:
-                        supabase.table("templates").insert({
-                            "id": str(uuid.uuid4()),
-                            "text": text,
-                            "category": cat,
-                            "groups": assign  # now works because the column exists and is text[]
-                        }).execute()
-                        st.success("Template added.")
-                        st.rerun()
-                    except Exception as e:
-                        st.error(f"Template save failed: {e}")
+        with tabs[0]:  # "My Profile" tab
+            st.subheader("My Profile")
+
+            st.markdown(f"**Email:** `{st.session_state.username}`")
+            st.markdown(f"**Role:** `{st.session_state.user_role}`")
+
+            # Fetch current profile info
+            profile_data = supabase.table("profiles").select("*").eq("id", st.session_state.user_id).execute().data
+            profile = profile_data[0] if profile_data else {}
+
+            current_name = profile.get("username", "")
+            display_name = st.text_input("Your Display Name (seen by teachers)", value=current_name)
+
+            st.markdown("### Update Your Class Groups")
+            current_groups = st.session_state.get("user_groups", [])
+            valid_groups = [g for g in current_groups if g in CLASS_GROUPS]
+            updated_groups = st.multiselect("Select Your Classes", CLASS_GROUPS, default=valid_groups)
+
+            user_role = st.selectbox("Select Your Role", ["student", "teacher", "admin"], index=["student", "teacher", "admin"].index(st.session_state.user_role))
+
+            if st.button("Save My Profile"):
+                update_data = {
+                    "username": display_name,
+                    "groups": updated_groups,
+                    "role": user_role
+                }
+
+                response = supabase.table("profiles").update(update_data).eq("id", st.session_state.user_id).execute()
+
+                if response.data:
+                    st.session_state.user_groups = updated_groups
+                    st.session_state.user_role = user_role  # ← Update session immediately
+                    st.success("Profile updated successfully.")
+                    st.rerun()
+                else:
+                    st.warning("Update attempt returned no rows. Check RLS or ID match.")
 
         with tabs[1]:
             st.subheader("All Templates")
