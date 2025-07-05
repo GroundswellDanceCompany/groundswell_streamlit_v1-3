@@ -64,7 +64,7 @@ if not st.session_state.logged_in:
                     st.session_state.user_groups = []
 
                 st.success("Login successful!")
-                st.experimental_rerun()
+                st.rerun()
 
             else:
                 st.error("Invalid email or password.")
