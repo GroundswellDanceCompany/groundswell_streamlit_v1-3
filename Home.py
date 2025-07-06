@@ -73,10 +73,10 @@ if not st.session_state.logged_in:
             st.error(f"Login failed: {e}")
 
     if st.button("Sign Up"):
-        st.switch_page("Pages/Signup.py")
+        st.switch_page("pages/Signup.py")
 
     if st.button("Reset Password"):
-        st.switch_page("Pages/ResetPassword.py")
+        st.switch_page("pages/ResetPassword.py")
 
 else:
     st.success(f"Logged in as {st.session_state.username}")
@@ -97,12 +97,12 @@ else:
         st.sidebar.title("Navigation")
 
         if st.session_state.user_role == "admin":
-            st.sidebar.page_link("Pages/TeacherDashboard.py", label="Teacher Dashboard")
+            st.sidebar.page_link("pages/TeacherDashboard.py", label="Teacher Dashboard")
         else:
-            st.sidebar.page_link("Pages/Student.py", label="Student Dashboard")
+            st.sidebar.page_link("pages/Student.py", label="Student Dashboard")
 
-        st.sidebar.page_link("Pages/Signup.py", label="Sign Up")
-        st.sidebar.page_link("Pages/ResetPassword.py", label="Reset Password")
+        st.sidebar.page_link("pages/Signup.py", label="Sign Up")
+        st.sidebar.page_link("pages/ResetPassword.py", label="Reset Password")
 
         
  
