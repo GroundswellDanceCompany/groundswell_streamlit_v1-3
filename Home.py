@@ -93,5 +93,16 @@ else:
     if st.button("Logout"):
         logout()
 
+    if st.session_state.logged_in:
+        st.sidebar.title("Navigation")
+
+        if st.session_state.user_role == "admin":
+            st.sidebar.page_link("Pages/TeacherDashboard.py", label="Teacher Dashboard")
+        else:
+            st.sidebar.page_link("Pages/Student.py", label="Student Dashboard")
+
+        st.sidebar.page_link("Pages/Signup.py", label="Sign Up")
+        st.sidebar.page_link("Pages/ResetPassword.py", label="Reset Password")
+
         
  
