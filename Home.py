@@ -63,7 +63,7 @@ if not st.session_state.logged_in:
                     st.session_state.user_role = "student"
                     st.session_state.user_groups = []
 
-                st.success("Login successful!")
+                st.success("Login successful! Now choose your page in the sidebar.")
                 st.rerun()
 
             else:
@@ -73,22 +73,25 @@ if not st.session_state.logged_in:
             st.error(f"Login failed: {e}")
 
     if st.button("Sign Up"):
-        st.switch_page("pages/Signup.py")
+        st.switch_page("Pages/Signup.py")
 
     if st.button("Reset Password"):
-        st.switch_page("pages/ResetPassword.py")
+        st.switch_page("Pages/ResetPassword.py")
 
 else:
     st.success(f"Logged in as {st.session_state.username}")
     st.markdown(f"**Role:** `{st.session_state.user_role}`")
-    st.markdown(f"**Groups:** `{', '.join(st.session_state.user_groups)}`")
+    st.markdown(f"**Groups:** `{', '.join(st.session_state.user_groups) if st.session_state.user_groups else 'None'}`")
 
     if st.session_state.user_role == "admin":
         st.markdown("### ✅ You are in Teacher mode.")
     else:
         st.markdown("### 🏆 You are in Student mode.")
 
+    st.markdown("**👉 Use the sidebar to navigate to your dashboard pages.**")
+
     if st.button("Logout"):
         logout()
+
         
  
